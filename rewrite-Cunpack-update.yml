@@ -1,0 +1,34 @@
+name: Распаковать Тихий ящик v27
+
+on:
+  push:
+    paths:
+      - 'quiet-mailbox-vercel-v27.zip'
+      - '.github/workflows/Cunpack-update.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unpack-v27:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Проверить ZIP v27
+        run: test -f quiet-mailbox-vercel-v27.zip
+
+      - name: Распаковать полный исходный код v27
+        run: unzip -o -q quiet-mailbox-vercel-v27.zip -d .
+
+      - name: Сохранить исходники в GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Обновить Тихий ящик до v27"
+            git push
+          fi
