@@ -66,7 +66,7 @@ assert '.info-pixel-heart' in c and '#appView .view .muted' in c
 assert '#appView .runner-overlay-text' in c
 
 # v23: intentional per-account personalization, private partner notes and game fullscreen controls.
-for element_id in ('personalizeButton', 'personalizationModal', 'themeChoices', 'tabOrderControls', 'savePersonalizationButton', 'partnerProfileModal', 'partnerProfileView', 'editPartnerProfileButton', 'partnerProfileForm', 'partnerProfileFields', 'addPartnerFieldButton', 'runnerClock', 'runnerRecordBadge', 'runnerScore', 'runnerRecord'):
+for element_id in ('personalizeButton', 'personalizationModal', 'themeChoices', 'tabOrderControls', 'savePersonalizationButton', 'partnerProfileModal', 'partnerProfileView', 'editPartnerProfileButton', 'partnerProfileForm', 'partnerProfileFields', 'addPartnerFieldButton', 'runnerLiveRecord', 'runnerRecordBadge', 'runnerMyRecord', 'runnerPartnerRecord'):
     assert f'id="{element_id}"' in h, element_id
 assert 'id="partnerBadge" class="partner-badge" type="button"' in h
 assert 'data-info-key="partnerProfile"' in h
@@ -99,7 +99,7 @@ assert 'id="partnerProfileForm" class="partner-profile-form hidden"' in profile_
 partner_shortcut = re.search(r'<div class="partner-shortcut">.*?</div>', h, re.S).group(0)
 assert 'data-info-key' not in partner_shortcut
 assert 'runnerLives' not in h and 'runnerLives' not in a
-assert 'formatRunnerTime' in a and 'runnerClock' in a and 'runnerRecordBadge' in h
+assert 'runnerLiveRecord' in h and 'runnerMyRecord' in h and 'runnerPartnerRecord' in h and 'runnerClock' not in h
 runner_controls = re.search(r'<div class="runner-utility-buttons">.*?</div>', h, re.S).group(0)
 assert runner_controls.index('runnerRestartBtn') < runner_controls.index('runner-fullscreen-button')
 assert '#openCapsuleButton' in c and 'position: static' in c
@@ -125,7 +125,7 @@ assert 'Твои очки' in scoreboard.group(0) and 'Очки соперник
 assert '#gameTictactoePanel .ttt-mode-switch' in c and 'flex-wrap: nowrap' in c
 assert '#gameTictactoePanel .ttt-scoreboard' in c
 
-# v27: theme-aware memory profile, fully continuous palette, compact label-free runner pills and shared restart icons.
+# v28: one shared theme surface (no pale nested tiles), plus a numerical live/paired-record runner HUD.
 assert 'partner-profile-memory-grid' in a and 'filledFields' in a
 assert 'partner-profile-info-grid' not in a and 'partner-profile-info-row' not in a
 assert 'PARTNER_PROFILE_ACCENTS' in a and 'normalizePartnerProfileAccent' in a
@@ -136,18 +136,20 @@ assert 'partner-profile-cover' in c and 'partner-profile-memory-card' in c
 assert '.partner-profile-count { display: none !important;' in c
 assert 'то, что хочется бережно помнить' in a and 'noteWord' not in a
 runner_hud = re.search(r'<div class="runner-scoreline".*?</div>\s*\n\s*\n\s*<div id="runnerStage"', h, re.S).group(0)
-assert 'id="runnerScore"' in runner_hud and 'id="runnerClock"' in runner_hud and 'id="runnerRecord"' in runner_hud
-assert 'runnerMyRecord' not in runner_hud and 'runnerPartnerRecord' not in runner_hud
-assert 'мой' not in runner_hud and 'партнёра' not in runner_hud
-assert 'runner-score-pill' in runner_hud and 'runner-time-record-pill' in runner_hud
-assert "$('#runnerScore')" in a and "$('#runnerRecord')" in a and 'runnerMyBestScore' in a
-assert 'runnerData?.partner' not in a
-assert '#gameRunnerPanel .runner-score-pill,' in c and 'border-radius: 999px' in c
-assert 'flex-wrap: nowrap;' in c and 'two-pill runner HUD' in c
-assert '--theme-card:' in c and '--theme-inset-filled:' in c and '--theme-summary-filled:' in c
-assert 'Theme surfaces deliberately mix only the chosen theme colours' in c
-assert 'html[data-theme] details > summary' in c and 'html[data-theme] :is(input, textarea, select)' in c
-assert 'v27 supplemental legacy inset coverage' in c and '#infoModal .info-modal-body p' in c
+for element_id in ('runnerLiveRecord', 'runnerMyRecord', 'runnerPartnerRecord', 'runnerRecordBadge'):
+    assert f'id="{element_id}"' in runner_hud, element_id
+for obsolete in ('id="runnerScore"', 'id="runnerClock"', 'id="runnerRecord"', 'runner-time-record-pill', 'runner-score-pill', 'runner-stat-divider'):
+    assert obsolete not in runner_hud, obsolete
+assert 'runner-live-record-pill' in runner_hud and 'runner-pair-record-pill' in runner_hud and 'runner-record-colon' in runner_hud
+assert '>:</span>' in runner_hud and 'очков' not in runner_hud
+assert "$('#runnerLiveRecord')" in a and "$('#runnerMyRecord')" in a and "$('#runnerPartnerRecord')" in a
+assert 'runnerMyBestScore' in a and 'runnerPartnerBestScore' in a and 'runnerData?.partner?.best_score' in a
+assert 'formatRunnerTime' not in a
+assert '#gameRunnerPanel .runner-live-record-pill,' in c and '#gameRunnerPanel .runner-pair-record-pill' in c and 'border-radius: 999px' in c
+assert 'flex-wrap: nowrap;' in c and 'two numerical pills only' in c
+assert '--theme-unified-surface:' in c and '--theme-unified-active:' in c and '--theme-unified-line:' in c
+assert 'remove the pale nested-tile effect' in c
+assert 'html[data-theme] :is(input, textarea, select, details > summary)' in c
 assert 'game-bottom-utilities' in h and 'game-bottom-fullscreen' in h
 assert h.count('class="game-restart-button') >= 3
 assert '↻ Сбросить историю' not in h and 'Новая партия ↻' not in h
@@ -173,17 +175,21 @@ readme = (p / 'README-VERCEL.md').read_text()
 publish = (p / 'PUBLISH-ON-VERCEL.md').read_text()
 assert 'Не удаляйте, не заменяйте' in readme and 'С прежней `DATABASE_URL`' in publish
 assert 'Не создавайте новый проект' in readme and 'Не создавайте новый Vercel-проект' in publish
-assert (p / 'RELEASE-v27.md').is_file()
+assert (p / 'RELEASE-v28.md').is_file()
 update_guide = (p / 'UPDATE-EXISTING-VERCEL.md').read_text()
-assert 'Не создавайте новый Vercel-проект' in update_guide and 'Не удаляйте' in update_guide
-assert 'npx vercel@latest link' in update_guide and 'Link to existing project? → Yes' in update_guide
-assert 'Вариант B — обновление с iPad' in update_guide and 'Не открывайте `vercel.com/drop`' in update_guide
-assert (p / 'GITHUB-PHONE-SETUP.md').is_file() and (p / 'github-phone-unpack-update.yml').is_file()
+assert 'Не создавайте новый Vercel-проект' in update_guide and 'не удаляйте' in update_guide.lower()
+assert 'Git CLI' in update_guide and 'Cunpack-update.yml' in update_guide
+assert 'Не используйте Vercel Drop' in update_guide and 'github-actions[bot]' in update_guide
+assert 'npx vercel@latest' not in update_guide
+assert (p / 'GITHUB-PHONE-SETUP.md').is_file() and (p / 'github-phone-unpack-update.yml').is_file() and (p / 'Cunpack-update-v28.yml').is_file()
 phone_guide = (p / 'GITHUB-PHONE-SETUP.md').read_text()
 phone_workflow = (p / 'github-phone-unpack-update.yml').read_text()
-assert 'quiet-mailbox-vercel-v27.zip' in phone_guide and '.github/workflows/unpack-update.yml' in phone_guide
+v28_workflow = (p / 'Cunpack-update-v28.yml').read_text()
+assert 'quiet-mailbox-vercel-v28.zip' in phone_guide and 'Cunpack-update.yml' in phone_guide
 assert 'workflow_dispatch:' in phone_workflow and 'inputs:' in phone_workflow and 'unzip -o -q' in phone_workflow
 assert 'contents: write' in phone_workflow and 'test -f "$ARCHIVE"' in phone_workflow
+assert "quiet-mailbox-vercel-v28.zip" in v28_workflow and "'.github/workflows/Cunpack-update.yml'" in v28_workflow
+assert 'Обновить Тихий ящик до v28' in v28_workflow
 
 # Four symmetric header emojis: two before and two after the anniversary date.
 anniversary = re.search(r'<button id="anniversaryButton".*?</button>', h, re.S).group(0)
@@ -195,4 +201,4 @@ for path in p.rglob('*'):
     if path.is_file() and 'node_modules' not in path.parts and path.suffix in ['.js', '.json', '.html']:
         assert not re.search(r'openai|anthropic|gemini|/api/ai\b|ai-provider|ai-prompts', path.read_text(), re.I), path
 
-print('PASS: v27 wiring — continuous theme surfaces, compact runner score/time-record pills, retained Vercel data model, and conventional Tic-Tac-Toe.')
+print('PASS: v28 wiring — unified theme surfaces, numerical runner records, retained Vercel data model, and conventional Tic-Tac-Toe.')

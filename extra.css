@@ -1521,34 +1521,6 @@ html[data-theme] .app-shell { background: transparent; }
 }
 #openCapsuleButton:hover { transform: none; }
 
-/* One quiet line for the endless run: live time/points at left, personal records at right. */
-#gameRunnerPanel .runner-scoreline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  min-width: 0;
-  margin: 13px 0 0;
-  padding: 9px 11px;
-  border: 1px solid color-mix(in srgb, var(--line) 82%, white);
-  border-radius: 11px;
-  background: rgba(255,255,255,.5);
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.35;
-}
-#gameRunnerPanel .runner-time-score { flex: 0 0 auto; white-space: nowrap; }
-#gameRunnerPanel #runnerClock { color: var(--accent-dark); font-size: 12px; }
-#gameRunnerPanel .runner-record-badge {
-  min-width: 0;
-  margin: 0;
-  color: var(--muted);
-  font-size: 10px;
-  line-height: 1.35;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
 #gameRunnerPanel .runner-controls-row { justify-content: flex-end; margin-top: 10px; }
 #gameRunnerPanel .runner-utility-buttons { display: inline-flex; align-items: center; gap: 7px; }
 #gameRunnerPanel .runner-restart-btn,
@@ -1661,9 +1633,6 @@ body.game-fallback-fullscreen-active { overflow: hidden; }
 
 @media (max-width: 600px) {
   #openCapsuleButton { width: 100%; text-align: center; }
-  #gameRunnerPanel .runner-scoreline { gap: 8px; padding: 8px 9px; }
-  #gameRunnerPanel #runnerClock { font-size: 11px; }
-  #gameRunnerPanel .runner-record-badge { font-size: 9px; }
   #settingsModal.overlay-modal { padding: 12px; }
   #settingsModal .settings-modal-card { width: calc(100vw - 24px); padding: 20px 16px; }
   #settingsModal .settings-layout { gap: 12px; }
@@ -1673,8 +1642,6 @@ body.game-fallback-fullscreen-active { overflow: hidden; }
 }
 
 @media (max-width: 365px) {
-  #gameRunnerPanel .runner-scoreline { align-items: flex-start; flex-direction: column; }
-  #gameRunnerPanel .runner-record-badge { width: 100%; text-align: left; }
   #gameRunnerPanel .runner-controls-row { justify-content: stretch; }
   #gameRunnerPanel .runner-utility-buttons { width: 100%; }
   #gameRunnerPanel .runner-restart-btn,
@@ -1857,46 +1824,6 @@ body.game-fallback-fullscreen-active { overflow: hidden; }
   line-height: 1;
 }
 
-/* Runner records borrow the compact two-number language of Tic-Tac-Toe. */
-#gameRunnerPanel .runner-scoreline {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-}
-#gameRunnerPanel .runner-time-score { min-width: 0; }
-#gameRunnerPanel .runner-record-badge {
-  display: grid;
-  grid-template-columns: repeat(2, 34px);
-  gap: 2px 5px;
-  width: auto;
-  margin: 0;
-  color: var(--muted);
-  text-align: center;
-}
-#gameRunnerPanel .runner-record-caption {
-  grid-column: 1 / -1;
-  color: var(--accent-dark);
-  font-size: 9px;
-  font-weight: 800;
-  line-height: 1;
-}
-#gameRunnerPanel .runner-record-slot { display: grid; justify-items: center; gap: 2px; min-width: 0; }
-#gameRunnerPanel .runner-record-slot strong {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 25px;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, white);
-  border-radius: 8px;
-  color: var(--accent-dark);
-  background: rgba(255,255,255,.76);
-  font-size: 12px;
-  line-height: 1;
-}
-#gameRunnerPanel .runner-record-slot small { color: var(--muted); font-size: 8px; line-height: 1; white-space: nowrap; }
-
 /* Every game now keeps fullscreen in one predictable place: its lower-left utility area. */
 .game-bottom-utilities { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; }
 .truths-bottom-utilities { margin-top: 14px; }
@@ -1927,14 +1854,9 @@ body.game-fallback-fullscreen-active { overflow: hidden; }
   .partner-profile-cover { grid-template-columns: auto minmax(0, 1fr); }
   .partner-profile-count { grid-column: 2; justify-self: start; margin-top: -2px; }
   .partner-profile-memory-grid { gap: 7px; }
-  #gameRunnerPanel .runner-scoreline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-  #gameRunnerPanel .runner-record-badge { grid-template-columns: repeat(2, 31px); gap: 2px 4px; }
-  #gameRunnerPanel .runner-record-slot strong { width: 31px; height: 24px; font-size: 11px; }
 }
 
 @media (max-width: 365px) {
-  #gameRunnerPanel .runner-scoreline { display: grid; align-items: center; flex-direction: initial; }
-  #gameRunnerPanel .runner-record-badge { width: auto; text-align: center; }
   #gameRunnerPanel .runner-controls-row { justify-content: flex-start; }
   #gameRunnerPanel .runner-utility-buttons { width: auto; }
   #gameRunnerPanel .runner-restart-btn,
@@ -2012,62 +1934,6 @@ body.game-fallback-fullscreen-active { overflow: hidden; }
   border-radius: 10px;
   font-size: 10px;
 }
-
-/* Two separate, single-line pills keep the live score and records inside their own outlines. */
-#gameRunnerPanel .runner-scoreline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  gap: 7px;
-  width: 100%;
-  margin-top: 13px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-#gameRunnerPanel .runner-time-score,
-#gameRunnerPanel .runner-record-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 36px;
-  box-sizing: border-box;
-  margin: 0;
-  border: 1px solid color-mix(in srgb, var(--line) 86%, white);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper) 72%, white);
-  box-shadow: 0 3px 9px color-mix(in srgb, var(--accent) 7%, transparent);
-}
-#gameRunnerPanel .runner-time-score { flex: 0 0 auto; padding: 7px 10px; white-space: nowrap; }
-#gameRunnerPanel #runnerClock { color: var(--accent-dark); font-size: 10px; line-height: 1; }
-#gameRunnerPanel .runner-record-badge {
-  flex: 1 1 auto;
-  justify-content: center;
-  min-width: 0;
-  padding: 7px 9px;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 9px;
-  line-height: 1;
-  white-space: nowrap;
-  text-align: left;
-}
-#gameRunnerPanel .runner-record-caption { color: var(--accent-dark); font-size: 10px; font-weight: 800; }
-#gameRunnerPanel .runner-record-slot { display: inline-flex; align-items: baseline; justify-items: initial; gap: 2px; min-width: 0; }
-#gameRunnerPanel .runner-record-slot + .runner-record-slot::before { content: '·'; margin-right: 1px; color: var(--line); }
-#gameRunnerPanel .runner-record-slot strong {
-  display: inline;
-  width: auto;
-  height: auto;
-  border: 0;
-  border-radius: 0;
-  color: var(--accent-dark);
-  background: transparent;
-  font-size: 11px;
-  line-height: 1;
-}
-#gameRunnerPanel .runner-record-slot small { order: -1; color: var(--muted); font-size: 8px; line-height: 1; white-space: nowrap; }
 
 /* A restart is the same quiet icon in every game, immediately beside fullscreen. */
 .game-restart-button,
@@ -2157,23 +2023,8 @@ html[data-theme] :is(.games-modal-cat, .runner-heading-icon, .theme-choice, .par
 @media (max-width: 600px) {
   .partner-profile-field { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 74px 28px; gap: 5px; padding: 8px; }
   .partner-profile-field .partner-profile-accent-label select { min-height: 37px; padding: 7px 4px; font-size: 9px; }
-  #gameRunnerPanel .runner-scoreline { gap: 5px; }
-  #gameRunnerPanel .runner-time-score { padding-inline: 8px; }
-  #gameRunnerPanel #runnerClock { font-size: 9px; }
-  #gameRunnerPanel .runner-record-badge { padding-inline: 7px; gap: 3px; font-size: 9px; }
-  #gameRunnerPanel .runner-record-caption { font-size: 10px; }
-  #gameRunnerPanel .runner-record-slot strong { font-size: 11px; }
-  #gameRunnerPanel .runner-record-slot small { font-size: 8px; }
 }
 @media (max-width: 365px) {
-  #gameRunnerPanel .runner-scoreline { display: flex; align-items: center; flex-direction: row; }
-  #gameRunnerPanel .runner-time-score,
-  #gameRunnerPanel .runner-record-badge { min-height: 33px; }
-  #gameRunnerPanel .runner-time-score { padding-inline: 6px; }
-  #gameRunnerPanel .runner-record-badge { padding-inline: 6px; gap: 2px; font-size: 7px; }
-  #gameRunnerPanel .runner-record-caption { font-size: 7px; }
-  #gameRunnerPanel .runner-record-slot strong { font-size: 8px; }
-  #gameRunnerPanel .runner-record-slot small { font-size: 6px; }
 }
 
 /* Theme coverage for nested surfaces that have their own legacy paint. */
@@ -2277,62 +2128,6 @@ html[data-theme] .modal-close:focus-visible {
 }
 html[data-theme] .toast { color: var(--paper); background: var(--accent-dark) !important; }
 
-/* Runner: current score and time/record remain a clean two-pill row with no owner labels. */
-#gameRunnerPanel .runner-scoreline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  gap: 7px;
-  width: 100%;
-  min-width: 0;
-  margin-top: 13px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-#gameRunnerPanel .runner-score-pill,
-#gameRunnerPanel .runner-time-record-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 36px;
-  border: 1px solid color-mix(in srgb, var(--line) 84%, var(--accent));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper-deep) 58%, var(--paper));
-  box-shadow: 0 3px 9px color-mix(in srgb, var(--accent) 8%, transparent);
-  color: var(--accent-dark);
-  white-space: nowrap;
-}
-#gameRunnerPanel .runner-score-pill {
-  flex: 0 0 auto;
-  padding: 7px 10px;
-}
-#gameRunnerPanel .runner-score-pill strong { color: var(--accent-dark); font-size: 10px; line-height: 1; }
-#gameRunnerPanel .runner-time-record-pill {
-  flex: 1 1 auto;
-  justify-content: center;
-  min-width: 0;
-  padding: 7px 10px;
-  gap: 6px;
-  font-size: 10px;
-  line-height: 1;
-}
-#gameRunnerPanel .runner-time-record-pill time,
-#gameRunnerPanel .runner-time-record-pill strong { color: var(--accent-dark); font: inherit; font-weight: 800; }
-#gameRunnerPanel .runner-stat-divider { color: var(--muted); }
-
-@media (max-width: 600px) {
-  #gameRunnerPanel .runner-scoreline { gap: 5px; }
-  #gameRunnerPanel .runner-score-pill { padding-inline: 8px; }
-  #gameRunnerPanel .runner-score-pill strong { font-size: 9px; }
-  #gameRunnerPanel .runner-time-record-pill { padding-inline: 8px; gap: 5px; font-size: 9px; }
-}
-@media (max-width: 365px) {
-  #gameRunnerPanel .runner-score-pill { padding-inline: 6px; }
-  #gameRunnerPanel .runner-score-pill strong { font-size: 8px; }
-  #gameRunnerPanel .runner-time-record-pill { padding-inline: 6px; gap: 4px; font-size: 8px; }
-}
-
 /* v27 supplemental legacy inset coverage */
 /* Keep every formerly white inset in the same account palette, including dynamically rendered rows. */
 html[data-theme] :is(
@@ -2374,4 +2169,130 @@ html[data-theme] #infoModal .info-modal-card {
 html[data-theme] #infoModal .info-modal-body p {
   border-color: var(--theme-outline) !important;
   background: var(--theme-inset-filled) !important;
+}
+
+
+/* === v28 continuous surfaces and numeric runner records === */
+/* v28: remove the pale nested-tile effect instead of merely tinting it. */
+html[data-theme] {
+  /* One deliberately substantial theme surface is shared by parent cards and nested controls. */
+  --theme-unified-surface: color-mix(in srgb, var(--paper-deep) 72%, var(--accent));
+  --theme-unified-active: color-mix(in srgb, var(--paper-deep) 52%, var(--accent));
+  --theme-unified-line: color-mix(in srgb, var(--line) 40%, var(--accent));
+}
+html[data-theme='white'] {
+  /* The neutral theme remains warm ivory rather than turning pink. */
+  --theme-unified-surface: color-mix(in srgb, var(--paper-deep) 93%, var(--accent));
+  --theme-unified-active: color-mix(in srgb, var(--paper-deep) 77%, var(--accent));
+}
+html[data-theme] :is(
+  .card, .modal-card, .settings-card, .auth-card, .auth-alert, .date-card, .games-page-card,
+  .talk-outcome-card, .homework-card, .truths-builder-card, .truths-active-area,
+  .truths-round-card, .truths-reveal-item, .game-start, .game-waiting, .game-reveal,
+  .game-question, .game-reveal-person, .game-score, .ttt-status-banner, .ttt-score-pill,
+  .list-details, .wish-row, .agreement-row, .our-list-row, .note-item, .feedback-row,
+  .partner-profile-field, .tab-order-group, .tab-order-item, .successful-date-card,
+  .custom-idea-row, .anniversary-idea-row, .decision-choice-row, .capsule-result,
+  .decision-result, .outcome-message, .outcome-no, .homework-problem,
+  .homework-partner-answer, .truth-topic-banner, .idea-result, .idea-no-message,
+  .runner-legend-card, .runner-legend-col, .runner-overlay, .runner-stat,
+  .ttt-cell, .ttt-mini-piece, .game-choice, .game-match, .game-challenge,
+  .truths-option-label, .truths-option-tag, .truth-badge, .achievement-strip,
+  .invite-banner, .anniversary-callout, .anniversary-countdown, .games-modal-cat,
+  .date-choice-button, .idea-draw-button, .date-place-button, .games-shortcut,
+  .partner-profile-view, .partner-profile-cover, .info-modal-body p,
+  .main-tabs, .top-menu-dropdown, .mailbox-subnav, .date-subtabs, .games-subtabs
+) {
+  border-color: var(--theme-unified-line) !important;
+  background: var(--theme-unified-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+/* Inputs and the collapsed-summary strip no longer paint a lighter rectangle inside a card. */
+html[data-theme] :is(input, textarea, select, details > summary) {
+  border-color: var(--theme-unified-line) !important;
+  background: var(--theme-unified-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+html[data-theme] button:not(.button.primary):not(.info-heart-button) {
+  border-color: var(--theme-unified-line) !important;
+  background: var(--theme-unified-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+html[data-theme] :is(
+  .main-tab.active, .mailbox-subtab.active, .date-subtab.active, .game-subtab.active,
+  .ttt-mode-btn.active, .date-choice-button.active, .theme-choice.selected,
+  .game-choice:has(input:checked), .truths-option-label:has(input:checked),
+  .ttt-cell.is-draw, details[open] > summary
+) {
+  border-color: var(--accent) !important;
+  background: var(--theme-unified-active) !important;
+  background-image: none !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 13%, transparent) !important;
+}
+html[data-theme] #infoModal .info-modal-card,
+html[data-theme] #infoModal .info-modal-body p {
+  border-color: var(--theme-unified-line) !important;
+  background: var(--theme-unified-surface) !important;
+  background-image: none !important;
+}
+
+/* Runner: two numerical pills only — live running score; then my record : partner record. */
+#gameRunnerPanel .runner-scoreline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 13px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+#gameRunnerPanel .runner-live-record-pill,
+#gameRunnerPanel .runner-pair-record-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  border: 1px solid var(--theme-unified-line);
+  border-radius: 999px;
+  background: var(--theme-unified-surface);
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+#gameRunnerPanel .runner-live-record-pill {
+  flex: 0 1 auto;
+  min-width: 48px;
+  justify-content: center;
+  padding: 7px 12px;
+}
+#gameRunnerPanel .runner-pair-record-pill {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 12px;
+}
+#gameRunnerPanel :is(.runner-live-record-pill, .runner-pair-record-pill) strong {
+  color: var(--accent-dark);
+  font: inherit;
+  font-weight: 800;
+}
+#gameRunnerPanel .runner-record-colon { color: var(--muted); font-weight: 800; }
+
+@media (max-width: 600px) {
+  #gameRunnerPanel .runner-scoreline { gap: 5px; }
+  #gameRunnerPanel .runner-live-record-pill { min-width: 43px; padding-inline: 9px; }
+  #gameRunnerPanel .runner-pair-record-pill { gap: 5px; padding-inline: 9px; }
+}
+@media (max-width: 365px) {
+  #gameRunnerPanel .runner-live-record-pill { min-width: 39px; padding-inline: 7px; font-size: 10px; }
+  #gameRunnerPanel .runner-pair-record-pill { gap: 4px; padding-inline: 7px; font-size: 10px; }
 }

@@ -88,7 +88,7 @@ for (const width of [1280, 390]) {
     const selectors = [
       '.write-card', '.write-card textarea', '.mailbox-subtab', '#topMenuButton',
       '#agreementsDetails > summary', '#infoModal .info-modal-body p',
-      '#tttBoard .ttt-cell', '#gameRunnerPanel .runner-time-record-pill',
+      '#tttBoard .ttt-cell', '#gameRunnerPanel .runner-pair-record-pill',
     ];
     const before = document.documentElement.dataset.theme;
     const paint = (selector) => {
@@ -114,6 +114,34 @@ for (const width of [1280, 390]) {
     assert(new Set(paints.map((paint) => `${paint.color}|${paint.image}|${paint.border}`)).size >= 4, `${selector} visibly follows the individual account palettes`);
   }
   assert.equal(paletteCoverage.snapshots.purple['#agreementsDetails > summary'].display, 'block', 'closed accordions receive a real palette-filled summary strip');
+  const flatSurfaceAudit = await page.evaluate(async () => {
+    const themes = ['white', 'pink', 'purple', 'blue', 'yellow', 'cyan'];
+    const before = document.documentElement.dataset.theme;
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const settleTheme = async () => { await nextFrame(); await new Promise((resolve) => setTimeout(resolve, 220)); };
+    const color = (selector) => getComputedStyle(document.querySelector(selector)).backgroundColor;
+    const results = {};
+    for (const theme of themes) {
+      document.documentElement.dataset.theme = theme;
+      await settleTheme();
+      results[theme] = {
+        card: color('.write-card'),
+        input: color('.write-card textarea'),
+        details: color('#agreementsDetails'),
+        summary: color('#agreementsDetails > summary'),
+        modal: color('#infoModal .info-modal-card'),
+        modalParagraph: color('#infoModal .info-modal-body p'),
+      };
+    }
+    document.documentElement.dataset.theme = before;
+    await settleTheme();
+    return results;
+  });
+  for (const [theme, colors] of Object.entries(flatSurfaceAudit)) {
+    assert.equal(colors.input, colors.card, `${theme}: fields blend with their card instead of becoming a pale tile`);
+    assert.equal(colors.summary, colors.details, `${theme}: collapsed summary blends with its parent instead of becoming a pale tile`);
+    assert.equal(colors.modalParagraph, colors.modal, `${theme}: modal inset shares its surface`);
+  }
   const settingsGeometry = await page.locator('#settingsModal .settings-modal-card').evaluate((card) => {
     const box = card.getBoundingClientRect();
     return { left: box.left, right: box.right, width: box.width, scrollWidth: document.querySelector('#settingsModal').scrollWidth, viewport: innerWidth };
@@ -156,9 +184,10 @@ for (const width of [1280, 390]) {
   assert.equal(await page.locator('#infoTitle').textContent(), 'Ящик');
   const quietModal = await page.locator('#infoModal .info-modal-card').evaluate((card) => {
     const style = getComputedStyle(card);
-    return { image: style.backgroundImage, border: style.borderColor, body: getComputedStyle(card.querySelector('.info-modal-body')).color };
+    return { image: style.backgroundImage, color: style.backgroundColor, border: style.borderColor, body: getComputedStyle(card.querySelector('.info-modal-body')).color };
   });
-  assert.match(quietModal.image, /linear-gradient/, 'info modal surface now follows the active theme');
+  assert.equal(quietModal.image, 'none', 'info modal uses the same solid themed surface rather than a pale gradient tile');
+  assert.notEqual(quietModal.color, 'rgba(0, 0, 0, 0)', 'info modal has a filled account-themed surface');
   assert.notEqual(quietModal.border, 'rgb(238, 204, 223)', 'info modal no longer keeps the fixed pink border');
   await page.locator('[data-close-modal="infoModal"]').click();
 
@@ -205,54 +234,55 @@ for (const width of [1280, 390]) {
   assert.match(runnerPanelText, /Любимое село/);
   assert.doesNotMatch(runnerPanelText, /Питер|Тюмень|км|6:00|Прыжок/);
   assert.equal(await page.locator('.runner-route-btn, #runnerJumpBtn, #runnerTime, #runnerKmLeft, #runnerLives').count(), 0);
-  assert.equal(await page.locator('#runnerScore').textContent(), '0 очков');
-  assert.equal(await page.locator('#runnerClock').textContent(), '00:00');
-  assert.equal(await page.locator('#runnerRecord').textContent(), '0');
+  assert.equal(await page.locator('#runnerLiveRecord').textContent(), '0');
+  assert.equal(await page.locator('#runnerMyRecord').textContent(), '0');
+  assert.equal(await page.locator('#runnerPartnerRecord').textContent(), '0');
   const runnerHudText = await page.locator('#gameRunnerPanel .runner-scoreline').textContent();
-  assert.doesNotMatch(runnerHudText, /мой|партнёра|рекорд/i, 'the compact HUD contains only its values, never owner labels');
-  assert.equal(await page.locator('#runnerMyRecord, #runnerPartnerRecord, .runner-record-slot, .runner-record-caption').count(), 0);
+  assert.doesNotMatch(runnerHudText, /очков|00:00|мой|партнёра|рекорд/i, 'the HUD visibly contains only numerical values');
+  assert.equal(await page.locator('#runnerScore, #runnerClock, #runnerRecord, .runner-time-record-pill, .runner-score-pill').count(), 0);
   const runnerPills = await page.evaluate(() => {
     const scoreline = document.querySelector('#gameRunnerPanel .runner-scoreline');
-    const score = document.querySelector('#gameRunnerPanel .runner-score-pill');
-    const timeRecord = document.querySelector('#gameRunnerPanel .runner-time-record-pill');
-    const scoreBox = score.getBoundingClientRect(); const timeRecordBox = timeRecord.getBoundingClientRect();
+    const live = document.querySelector('#gameRunnerPanel .runner-live-record-pill');
+    const pair = document.querySelector('#gameRunnerPanel .runner-pair-record-pill');
+    const liveBox = live.getBoundingClientRect(); const pairBox = pair.getBoundingClientRect();
     return {
       display: getComputedStyle(scoreline).display,
       wrap: getComputedStyle(scoreline).flexWrap,
-      scoreRadius: getComputedStyle(score).borderRadius,
-      timeRecordRadius: getComputedStyle(timeRecord).borderRadius,
-      sameLine: Math.abs(scoreBox.top - timeRecordBox.top) < 2,
+      liveRadius: getComputedStyle(live).borderRadius,
+      pairRadius: getComputedStyle(pair).borderRadius,
+      sameLine: Math.abs(liveBox.top - pairBox.top) < 2,
       fits: scoreline.scrollWidth <= scoreline.clientWidth + 1,
-      separate: getComputedStyle(score).borderStyle !== 'none' && getComputedStyle(timeRecord).borderStyle !== 'none',
-      values: [score.textContent.trim(), timeRecord.textContent.replace(/\s+/g, ' ').trim()],
+      separate: getComputedStyle(live).borderStyle !== 'none' && getComputedStyle(pair).borderStyle !== 'none',
+      values: [live.textContent.trim(), pair.textContent.replace(/\s+/g, ' ').trim()],
     };
   });
   assert.equal(runnerPills.display, 'flex');
   assert.equal(runnerPills.wrap, 'nowrap');
-  assert.equal(runnerPills.sameLine, true, 'score and time/record stay in one visual line');
+  assert.equal(runnerPills.sameLine, true, 'live score and paired records stay in one visual line');
   assert.equal(runnerPills.fits, true, `runner pills fit at ${width}px`);
-  assert.equal(runnerPills.separate, true, 'score and time/record have independent outlines');
-  assert.match(runnerPills.scoreRadius, /999/);
-  assert.match(runnerPills.timeRecordRadius, /999/);
-  assert.deepEqual(runnerPills.values, ['0 очков', '00:00 · 0']);
+  assert.equal(runnerPills.separate, true, 'live score and paired records have independent outlines');
+  assert.match(runnerPills.liveRadius, /999/);
+  assert.match(runnerPills.pairRadius, /999/);
+  assert.deepEqual(runnerPills.values, ['0', '0 : 0']);
   const liveHud = await page.evaluate(() => {
     runnerGame = createRunnerState();
     runnerMyBestScore = 42;
+    runnerPartnerBestScore = 81;
     runnerGame.elapsedMs = 1100;
     runnerGame.bonusScore = 8;
     updateRunnerHud();
     return {
-      score: document.querySelector('#runnerScore').textContent,
-      time: document.querySelector('#runnerClock').textContent,
-      record: document.querySelector('#runnerRecord').textContent,
+      live: document.querySelector('#runnerLiveRecord').textContent,
+      mine: document.querySelector('#runnerMyRecord').textContent,
+      partner: document.querySelector('#runnerPartnerRecord').textContent,
       aria: document.querySelector('#runnerRecordBadge').getAttribute('aria-label'),
     };
   });
-  assert.equal(liveHud.time, '00:01');
-  assert.match(liveHud.score, /^20 очков$/);
-  assert.equal(liveHud.record, '42', 'the personal record rises visually only when the live run beats it');
-  assert.match(liveHud.aria, /Время 00:01; очки 20; рекорд 42/);
-  await page.evaluate(() => { runnerGame = createRunnerState(); runnerMyBestScore = 0; updateRunnerHud(); });
+  assert.equal(liveHud.live, '20', 'the first pill rises continuously during a run');
+  assert.equal(liveHud.mine, '42');
+  assert.equal(liveHud.partner, '81');
+  assert.match(liveHud.aria, /Мой рекорд 42; рекорд партнёра 81/);
+  await page.evaluate(() => { runnerGame = createRunnerState(); runnerMyBestScore = 0; runnerPartnerBestScore = 0; updateRunnerHud(); });
   assert.equal(await page.locator('#runnerRestartBtn').count(), 1);
   assert.equal(await page.locator('#runnerRestartBtn').textContent(), '↻');
   const runnerFullscreen = await page.locator('#gameRunnerPanel .game-fullscreen-button').evaluate((button) => {
@@ -460,4 +490,4 @@ for (const width of [1280, 390]) {
 
 assert.deepEqual(errors, []);
 await browser.close();
-console.log('PASS: v27 continuous theme surfaces, label-free runner score/time-record pills, shared restart/fullscreen utilities, and conventional TTT.');
+console.log('PASS: v28 continuous non-tiled theme surfaces, numerical live/paired runner records, shared restart/fullscreen utilities, and conventional TTT.');

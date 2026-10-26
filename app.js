@@ -2645,6 +2645,7 @@ function createRunnerState() {
 
 let runnerGame = createRunnerState();
 let runnerMyBestScore = 0;
+let runnerPartnerBestScore = 0;
 
 function runnerNow() {
   return typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : Date.now();
@@ -2654,34 +2655,28 @@ function runnerSeconds() {
   return runnerGame.elapsedMs / 1000;
 }
 
-function formatRunnerTime(elapsedMs) {
-  const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
 function updateRunnerHud() {
-  const clockEl = $('#runnerClock');
-  const scoreEl = $('#runnerScore');
-  const recordEl = $('#runnerRecord');
+  const liveEl = $('#runnerLiveRecord');
+  const mineEl = $('#runnerMyRecord');
+  const partnerEl = $('#runnerPartnerRecord');
   const badge = $('#runnerRecordBadge');
+  // The left pill is deliberately a running number: no clock and no visible wording.
   runnerGame.score = Math.floor(runnerGame.elapsedMs / 88) + runnerGame.bonusScore;
-  const visibleRecord = Math.max(runnerMyBestScore, runnerGame.score);
-  if (clockEl) clockEl.textContent = formatRunnerTime(runnerGame.elapsedMs);
-  if (scoreEl) scoreEl.textContent = `${runnerGame.score} очков`;
-  if (recordEl) recordEl.textContent = String(visibleRecord);
-  badge?.setAttribute('aria-label', `Время ${formatRunnerTime(runnerGame.elapsedMs)}; очки ${runnerGame.score}; рекорд ${visibleRecord}`);
+  if (liveEl) liveEl.textContent = String(runnerGame.score);
+  if (mineEl) mineEl.textContent = String(runnerMyBestScore);
+  if (partnerEl) partnerEl.textContent = String(runnerPartnerBestScore);
+  badge?.setAttribute('aria-label', `Мой рекорд ${runnerMyBestScore}; рекорд партнёра ${runnerPartnerBestScore}`);
 }
 
 function renderRunnerRecords(runnerData = {}) {
-  const recordEl = $('#runnerRecord');
+  const mineEl = $('#runnerMyRecord');
+  const partnerEl = $('#runnerPartnerRecord');
   const badge = $('#runnerRecordBadge');
-  const mineScore = Number(runnerData?.mine?.best_score || 0);
-  runnerMyBestScore = mineScore;
-  const visibleRecord = Math.max(mineScore, runnerGame.score || 0);
-  if (recordEl) recordEl.textContent = String(visibleRecord);
-  badge?.setAttribute('aria-label', `Время ${formatRunnerTime(runnerGame.elapsedMs)}; очки ${runnerGame.score || 0}; рекорд ${visibleRecord}`);
+  runnerMyBestScore = Number(runnerData?.mine?.best_score || 0);
+  runnerPartnerBestScore = Number(runnerData?.partner?.best_score || 0);
+  if (mineEl) mineEl.textContent = String(runnerMyBestScore);
+  if (partnerEl) partnerEl.textContent = String(runnerPartnerBestScore);
+  badge?.setAttribute('aria-label', `Мой рекорд ${runnerMyBestScore}; рекорд партнёра ${runnerPartnerBestScore}`);
 }
 
 function runnerJump() {

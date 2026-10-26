@@ -1,28 +1,49 @@
-import {chromium} from 'playwright';
+import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
-const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
-for(const width of [1280,390,320]){
- const page=await browser.newPage({viewport:{width,height:900}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:8000');
- await page.evaluate(async()=>{await localApi('/api/create',{method:'POST',body:JSON.stringify({name:'Маша',pin:'1234'})});await refresh();});
- assert.deepEqual(await page.locator('.main-tab').allTextContents(),['✍️ Ящик','🐱 Игры','💗 Свидания','🌷 Наше']);
- for(const tab of ['conversation','homework','mailbox']){
-  await page.locator(`[data-mailbox-view="${tab}"]`).click();assert(await page.locator(`#${tab}View`).isVisible());assert(await page.locator('.main-tab[data-view="mailbox"]').evaluate(e=>e.classList.contains('active')));
- }
- await page.locator('.main-tab[data-view="games"]').click();assert(await page.locator('#gamesView').isVisible());assert(!(await page.locator('#mailboxSubnav').isVisible()));
- await page.locator('[data-game-start]').click();await page.locator('.game-question').waitFor();
- const original=await page.locator('.game-question').getAttribute('data-round-id');
- await page.locator('input[name="gameGuess"][value="1"]').check();await page.locator('input[name="gameAnswer"][value="2"]').check();await page.locator('[data-game-submit]').click();await page.getByText('Твой ответ сохранён',{exact:true}).waitFor();
- for(const [mode,label] of [['support','Понять меня'],['choose','Мы выбираем'],['reactions','Наши реакции']]){
-  await page.locator('#gameMode').selectOption(mode);await page.locator('.game-category').filter({hasText:label}).waitFor();assert.equal(await page.locator('#gamesTitle').textContent(),label);
- }
- await page.locator('#gameMode').selectOption('know');await page.getByText('Твой ответ сохранён',{exact:true}).waitFor();
- const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('quiet_mailbox_demo')).gameRounds.filter(r=>r.mode_key==='know')[0].id);assert.equal(String(stored),original);
- await page.locator('.main-tab[data-view="our"]').click();
- const cards=await page.locator('.our-grid > .card').evaluateAll(es=>es.map(e=>{let r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,b:r.bottom}}));
- assert.equal(cards.length,5);for(let i=1;i<cards.length;i++){assert.equal(cards[i].x,cards[0].x);assert.equal(cards[i].w,cards[0].w);assert(cards[i].y>=cards[i-1].b);}
- for(const id of ['wishListDetails','intimateWishListDetails','agreementsDetails']){const d=page.locator('#'+id);await d.locator(':scope > summary').click();assert.equal(await d.getAttribute('open'),'');await d.locator(':scope > summary').click();}
- assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);
- console.log('PASS',width,'px: tabs/subtabs, four game modes, preserved submitted answer on return, strictly vertical cards, details, no overflow/errors');await page.close();
+
+const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+const pageErrors = [];
+
+for (const width of [1280, 390, 320]) {
+  const context = await browser.newContext({ viewport: { width, height: 900 } });
+  const page = await context.newPage();
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await page.goto('http://127.0.0.1:8000', { waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    await localApi('/api/create', { method: 'POST', body: JSON.stringify({ name: 'Маша', pin: '1234' }) });
+    await refresh();
+  });
+
+  const tabViews = await page.locator('.main-tab').evaluateAll((tabs) => tabs.map((tab) => tab.dataset.view).sort());
+  assert.deepEqual(tabViews, ['dates', 'games', 'mailbox', 'our'], 'all main views stay available regardless of saved ordering');
+  const subnav = page.locator('#mailboxSubnav');
+  assert.equal(await subnav.isVisible(), true);
+
+  for (const view of ['dates', 'our', 'games']) {
+    await page.locator(`.main-tab[data-view="${view}"]`).click();
+    assert.equal(await subnav.isVisible(), false, `mailbox subtabs hide outside ${view}`);
+  }
+  await page.locator('.main-tab[data-view="mailbox"]').click();
+  assert.equal(await subnav.isVisible(), true, 'mailbox subtabs return only after opening the mailbox');
+
+  await page.locator('.main-tab[data-view="games"]').click();
+  await page.locator('[data-game-subtab="runner"]').click();
+  assert.equal(await page.locator('#gameRunnerPanel').isVisible(), true);
+  const hud = await page.locator('#gameRunnerPanel .runner-scoreline').innerText();
+  assert.match(hud, /^\s*\d+\s+\d+\s*:\s*\d+\s*$/, 'runner HUD visibly contains only current number and paired numbers');
+  assert.equal(await page.locator('#runnerClock, #runnerScore, #runnerRecord').count(), 0, 'runner has no timer-era HUD nodes');
+
+  await page.locator('[data-game-subtab="tictactoe"]').click();
+  assert.equal(await page.locator('#gameTictactoePanel').isVisible(), true);
+  assert.equal(await page.locator('#tttBoard [data-ttt-cell]').count(), 9, 'Tic-Tac-Toe remains a conventional 3×3 board');
+  assert.equal(await page.locator('#tttResetBtn').count(), 1);
+  assert.equal(await page.locator('#gameTictactoePanel [data-fullscreen-target="gameTictactoePanel"]').count(), 1);
+
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `no horizontal overflow at ${width}px`);
+  console.log(`PASS ${width}px: current navigation, hidden mailbox subtabs, numerical Runner HUD, ordinary 3×3 TTT, no overflow`);
+  await context.close();
 }
+
+assert.deepEqual(pageErrors, []);
 await browser.close();
+console.log('PASS: current browser smoke audit.');

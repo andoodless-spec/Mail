@@ -6,7 +6,7 @@ on:
       archive:
         description: Имя ZIP в корне этого репозитория
         required: true
-        default: quiet-mailbox-vercel-v27.zip
+        default: quiet-mailbox-vercel-v28.zip
         type: string
 
 permissions:
