@@ -1,36 +1,23 @@
-name: Опубликовать обновление Тихого ящика из ZIP
+name: Распаковать Тихий ящик v27
 
 on:
   workflow_dispatch:
-    inputs:
-      archive:
-        description: Имя ZIP в корне этого репозитория
-        required: true
-        default: quiet-mailbox-vercel-v27.zip
-        type: string
 
 permissions:
   contents: write
 
 jobs:
-  unpack-update:
+  unpack-v27:
     runs-on: ubuntu-latest
     steps:
-      - name: Забрать текущий репозиторий
+      - name: Забрать репозиторий
         uses: actions/checkout@v4
 
-      - name: Проверить загруженный ZIP
-        env:
-          ARCHIVE: ${{ inputs.archive }}
-        run: |
-          test -n "$ARCHIVE"
-          test "$(basename "$ARCHIVE")" = "$ARCHIVE"
-          test -f "$ARCHIVE"
+      - name: Проверить ZIP v27
+        run: test -f quiet-mailbox-vercel-v27.zip
 
-      - name: Распаковать обновление в текущий проект
-        env:
-          ARCHIVE: ${{ inputs.archive }}
-        run: unzip -o -q "$ARCHIVE" -d .
+      - name: Распаковать полный исходный код v27
+        run: unzip -o -q quiet-mailbox-vercel-v27.zip -d .
 
       - name: Сохранить исходники в GitHub
         run: |
@@ -38,6 +25,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "Обновить Тихий ящик из ZIP"
+            git commit -m "Обновить Тихий ящик до v27"
             git push
           fi
