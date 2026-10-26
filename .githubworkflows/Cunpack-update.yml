@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: writ
+  contents: write
 
 jobs:
   unpack-v28:
