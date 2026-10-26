@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 64" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельные кожаные ботинки</title><desc id="desc">Пара кожаных ботинок как игровой буст</desc>
+  <path d="M10 14h24v25h9v6h8v12H8v-9h6V14z" fill="#ad6939"/>
+  <path d="M10 14h24v25h9v6h8v12H8v-9h6V14z" fill="none" stroke="#5b392b" stroke-width="4"/>
+  <path d="M17 20h12v6H17zM18 30h14v5H18z" fill="#e1a15b"/>
+  <path d="M50 8h23v26h7v7h7v13H45v-9h5V8z" fill="#bd7741"/>
+  <path d="M50 8h23v26h7v7h7v13H45v-9h5V8z" fill="none" stroke="#5b392b" stroke-width="4"/>
+  <path d="M56 14h12v6H56zM56 25h15v5H56z" fill="#e8ac62"/>
+  <rect x="9" y="53" width="39" height="6" fill="#3f302a"/><rect x="45" y="51" width="40" height="6" fill="#3f302a"/>
+</svg>

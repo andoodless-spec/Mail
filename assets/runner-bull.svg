@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 94" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельный бычок</title><desc id="desc">Добрый средний бычок, похожий на коровку</desc>
+  <!-- tail -->
+  <path d="M18 47h-8v-7H6v-7h5v7h8v7h6v7h-7z" fill="#513b32"/>
+  <!-- legs -->
+  <path d="M32 62h11v19h-6v6H25v-7h7zM71 62h11v19h7v6H70v-7h1z" fill="#653f30"/>
+  <rect x="24" y="82" width="17" height="6" fill="#3a302d"/><rect x="70" y="82" width="18" height="6" fill="#3a302d"/>
+  <!-- body -->
+  <path d="M24 39h16v-7h34v5h17v7h9v26h-7v7H79v5H36v-5H24v-8h-6V49h6z" fill="#bd724d"/>
+  <path d="M24 39h16v-7h34v5h17v7h9v26h-7v7H79v5H36v-5H24v-8h-6V49h6z" fill="none" stroke="#513b32" stroke-width="4"/>
+  <path d="M32 43h18v10h9v9H40v-5h-8zM65 64h19v11H70v-6h-5z" fill="#f4ddb8"/>
+  <!-- head, horn blocks, friendly eye -->
+  <path d="M91 23h8v-7h9v8h8v-8h9v8h6v9h-5v25h-7v8h-21v-5h-8V31h1z" fill="#bd724d" stroke="#513b32" stroke-width="4"/>
+  <path d="M98 22v-11h9v9h10v-9h9v12h-6v6h-17v-7z" fill="#f3d69d"/>
+  <path d="M101 34h17v6h5v14h-5v5h-17v-5h-5V40h5z" fill="#f1c2a6"/>
+  <rect x="102" y="39" width="7" height="9" fill="#fffdf6"/><rect x="104" y="41" width="3" height="5" fill="#352e2b"/>
+  <rect x="115" y="39" width="7" height="9" fill="#fffdf6"/><rect x="117" y="41" width="3" height="5" fill="#352e2b"/>
+  <rect x="107" y="54" width="10" height="6" fill="#d58685"/><rect x="109" y="55" width="2" height="2" fill="#59413c"/><rect x="114" y="55" width="2" height="2" fill="#59413c"/>
+  <!-- front running leg -->
+  <path d="M84 66h10v13h-5v8H77v-6h7z" fill="#bd724d"/><rect x="77" y="82" width="13" height="6" fill="#3a302d"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 180" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельное дерево</title><desc id="desc">Высокое полное дерево с квадратной кроной и стволом</desc>
+  <!-- trunk and roots -->
+  <path d="M59 92h23v52h13v12h19v12H25v-12h24v-12h10z" fill="#8c5938"/>
+  <path d="M59 112h10v20h-9v12h-8v-17h7zM82 106h9v25h11v13H87v-16h-5z" fill="#b77a4d"/>
+  <path d="M59 92h23v52h13v12h19" fill="none" stroke="#573b2c" stroke-width="5"/>
+  <!-- branches -->
+  <path d="M68 106V71H48V58h20V42h12v16h22v13H80v27z" fill="#7f4d31"/>
+  <!-- broad pixel crown -->
+  <path d="M33 75H20V61h10V47h13V34h15V23h24v9h18v13h13v13h9v23h-11v11H99v10H78v7H55v-8H39V98H25V84h8z" fill="#4f984b"/>
+  <path d="M33 75H20V61h10V47h13V34h15V23h24v9h18v13h13v13h9v23h-11v11H99v10H78v7H55v-8H39V98H25V84h8z" fill="none" stroke="#2f6e3a" stroke-width="5"/>
+  <path d="M43 48h17v12h11v12H52V61H43zM84 43h16v13h9v17H93V61H84zM67 78h19v16H74v-7H63V77z" fill="#72b95b"/>
+  <rect x="38" y="75" width="11" height="12" fill="#3c833f"/><rect x="98" y="77" width="10" height="12" fill="#3c833f"/>
+  <rect x="21" y="168" width="100" height="5" fill="#3d7f3e"/>
+</svg>

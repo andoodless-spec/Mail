@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 56" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельный камень</title><desc id="desc">Низкий камень в пиксельном стиле</desc>
+  <path d="M9 48h5v-11h7v-9h12v-8h22v5h12v8h8v7h6v8h-6v4H9z" fill="#88949a"/>
+  <path d="M14 48V37h7v-9h12v-8h22v5h12v8h8v7h6v8" fill="none" stroke="#46535a" stroke-width="4"/>
+  <path d="M30 29h14v6h-8v7h-9v-6h3zM57 33h11v8h-7v5h-8v-7h4z" fill="#b8c3c4"/>
+  <rect x="20" y="46" width="54" height="5" fill="#68767c"/>
+</svg>

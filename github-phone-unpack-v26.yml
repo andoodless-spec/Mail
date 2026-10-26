@@ -1,0 +1,31 @@
+name: Распаковать Тихий ящик v26
+
+on:
+  push:
+    paths:
+      - 'quiet-mailbox-vercel-v26.zip'
+      - '.github/workflows/unpack-v26.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unpack-v26:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Распаковать полный исходный код v26
+        run: unzip -o -q quiet-mailbox-vercel-v26.zip -d .
+
+      - name: Сохранить исходники в GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Добавить исходники Тихого ящика v26"
+            git push
+          fi

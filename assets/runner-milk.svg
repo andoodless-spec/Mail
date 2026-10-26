@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 78" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельный пакет молока</title><desc id="desc">Пакет молока как игровой буст</desc>
+  <path d="M11 20h6V9h8V4h13v5h7v11h5v53H11z" fill="#fffdf4"/>
+  <path d="M11 20h6V9h8V4h13v5h7v11h5v53H11z" fill="none" stroke="#3f7390" stroke-width="4"/>
+  <path d="M18 11h21v9H18z" fill="#9bd5e9"/><path d="M18 32h25v22H18z" fill="#7bc3dc"/>
+  <path d="M24 37h13v5H24zM27 43h8v6h-8z" fill="#fffdf4"/>
+  <rect x="16" y="59" width="29" height="8" fill="#c8e7ef"/>
+</svg>

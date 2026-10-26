@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffedf5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Тихий ящик">
+  <title>Тихий ящик</title>
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/reference.css">
+  <link rel="stylesheet" href="/extra.css">
+</head>
+<body>
+  <div class="grain"></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <section id="authView" class="auth-shell">
+    <div class="auth-intro">
+      <div id="authAlert" class="auth-alert hidden" role="alert"></div>
+      <h1>Привет!</h1>
+      <p class="lead">как тебя зовут, котик?</p>
+      <div class="cat-illustration" aria-hidden="true">
+        <svg viewBox="0 0 440 205" xmlns="http://www.w3.org/2000/svg">
+          <path class="cat-tail tail-pink" d="M95 155 C38 176 32 115 73 116" />
+          <path class="cat-tail tail-lilac" d="M333 158 C398 179 408 116 367 118" />
+          <g class="cat cat-pink">
+            <path class="cat-fur" d="M66 88 L79 33 L117 61 Q148 45 179 61 L216 33 L229 89 Q227 143 148 148 Q68 143 66 88Z" />
+            <path class="cat-ear" d="M82 51 L91 40 L110 63Z" />
+            <path class="cat-ear" d="M197 63 L215 40 L222 52Z" />
+            <ellipse class="cat-eye" cx="112" cy="91" rx="7" ry="10" />
+            <ellipse class="cat-eye" cx="183" cy="91" rx="7" ry="10" />
+            <path class="cat-face" d="M145 99 Q149 95 153 99 L149 104Z" />
+            <path class="cat-face" d="M149 104 Q145 113 137 109 M149 104 Q153 113 300 109" opacity="0" />
+            <path class="cat-face" d="M149 104 Q145 113 137 109 M149 104 Q153 113 161 109" />
+            <path class="cat-whisker" d="M133 103 L103 99 M133 109 L101 113 M165 103 L195 99 M165 109 L197 113" />
+          </g>
+          <g class="cat cat-lilac">
+            <path class="cat-fur" d="M213 96 L225 43 L260 67 Q291 50 323 67 L358 43 L371 96 Q369 150 291 155 Q213 150 213 96Z" />
+            <path class="cat-ear" d="M229 60 L237 49 L255 70Z" />
+            <path class="cat-ear" d="M341 70 L359 49 L367 60Z" />
+            <ellipse class="cat-eye" cx="259" cy="99" rx="7" ry="10" />
+            <ellipse class="cat-eye" cx="330" cy="99" rx="7" ry="10" />
+            <path class="cat-face" d="M291 107 Q295 103 299 107 L295 112Z" />
+            <path class="cat-face" d="M295 112 Q291 121 283 117 M295 112 Q299 121 307 117" />
+            <path class="cat-whisker" d="M279 111 L249 107 M279 117 L247 121 M311 111 L341 107 M311 117 L343 121" />
+          </g>
+          <path class="cat-heart" d="M218 22 C208 8 183 18 218 45 C253 18 228 8 218 22Z" />
+          <circle class="cat-sparkle" cx="48" cy="67" r="4" />
+          <circle class="cat-sparkle" cx="390" cy="72" r="4" />
+        </svg>
+      </div>
+      <div class="intro-note"><span>💌</span><span>Сладкое тоже важно сохранять.</span></div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth="create">Создать ящик</button>
+        <button class="auth-tab" data-auth="join">Подключиться</button>
+        <button class="auth-tab" data-auth="login">Войти снова</button>
+      </div>
+      <form id="createForm" class="auth-form">
+        <label>Как к тебе обращаться?
+          <input name="name" autocomplete="name" placeholder="Например, Яночкин" required maxlength="60">
+        </label>
+        <label>Твой личный пароль (PIN)
+          <input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" autocomplete="new-password" placeholder="4–8 цифр" required minlength="4" maxlength="8">
+        </label>
+        <button class="button primary" type="submit">Продолжить <span>→</span></button>
+        <p class="form-hint">PIN поможет вернуться в ящик.</p>
+      </form>
+      <form id="joinForm" class="auth-form hidden">
+        <label>Твоё имя
+          <input name="name" autocomplete="name" placeholder="Например, Саняня" required maxlength="60">
+        </label>
+        <label>Код приглашения
+          <input name="code" autocomplete="one-time-code" placeholder="Например, Q7KD4P2M" required maxlength="12" autocapitalize="characters">
+        </label>
+        <label>Твой личный пароль (PIN)
+          <input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" autocomplete="new-password" placeholder="4–8 цифр" required minlength="4" maxlength="8">
+        </label>
+        <button class="button primary" type="submit">Подключиться <span>→</span></button>
+        <p class="form-hint">Код — для партнёра, PIN — для входа.</p>
+      </form>
+      <form id="loginForm" class="auth-form hidden">
+        <label>Твоё имя
+          <input name="name" autocomplete="username" placeholder="Как в профиле" required maxlength="60">
+        </label>
+        <label>Твой личный пароль (PIN)
+          <input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" autocomplete="current-password" placeholder="Твой пароль (PIN)" required minlength="4" maxlength="8">
+        </label>
+        <button class="button primary" type="submit">Вернуться в ящик <span>→</span></button>
+        <p class="form-hint">Для входа нужны имя и PIN.</p>
+      </form>
+      <p id="authError" class="error-text"></p>
+    </div>
+  </section>
+
+  <section id="appView" class="app-shell hidden">
+    <header class="topbar">
+      <button id="anniversaryButton" class="anniversary-button" type="button" aria-haspopup="dialog" aria-controls="anniversaryModal" title="Открыть вашу праздничную дату">
+        <span class="anniversary-sparkle" aria-hidden="true">✨</span>
+        <span class="anniversary-heart" aria-hidden="true">💞</span>
+        <span class="anniversary-date-label">26.03.2025</span>
+        <span class="anniversary-sparkle anniversary-sparkle-right" aria-hidden="true">✨</span>
+        <span class="anniversary-ribbon" aria-hidden="true">🎀</span>
+      </button>
+      <div class="top-actions">
+        <div class="top-menu">
+          <button id="topMenuButton" class="top-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="topMenuDropdown" aria-label="Открыть меню" title="Меню">⋯</button>
+          <div id="topMenuDropdown" class="top-menu-dropdown hidden" role="menu">
+            <button id="feedbackButton" class="top-menu-item" type="button" role="menuitem">💡 Идеи</button>
+            <button id="settingsButton" class="top-menu-item" type="button" role="menuitem">⚙️ Настройки</button>
+            <button id="logoutButton" class="top-menu-item top-menu-logout" type="button" role="menuitem">🚪 Выйти</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div id="feedbackModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+      <div class="modal-card feedback-modal-card">
+        <button class="modal-close" data-close-modal="feedbackModal" aria-label="Закрыть">×</button>
+        <div class="card-kicker">чтобы не потерять мысль</div>
+        <h3 id="feedbackTitle">Идеи для будущих поправок</h3>
+        <p class="muted">Коротко: что изменить?</p>
+        <form id="feedbackForm" class="our-form">
+          <textarea name="text" maxlength="2000" placeholder="Например: добавить ещё один мягкий режим…" required></textarea>
+          <button class="button primary" type="submit">Сохранить идею</button>
+        </form>
+        <div id="feedbackList" class="feedback-list"></div>
+      </div>
+    </div>
+
+    <div id="settingsModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-card settings-modal-card">
+        <button class="modal-close" data-close-modal="settingsModal" aria-label="Закрыть">×</button>
+        <div class="card-kicker">ваш ящик</div>
+        <h3 id="settingsTitle">Настройки</h3>
+        <div class="settings-layout">
+          <article class="card settings-card profile-settings">
+            <div class="card-kicker">твой профиль</div>
+            <h3>Имя профиля</h3>
+            <p class="muted">Сейчас тебя зовут: <strong id="userName">—</strong></p>
+            <form id="profileNameForm" class="pin-form">
+              <input id="profileNameInput" name="name" maxlength="60" placeholder="Новое имя (например, Яночкин)" required>
+              <button class="button secondary" type="submit">Сохранить имя</button>
+            </form>
+          </article>
+          <article class="card settings-card pin-settings">
+            <div class="card-kicker">безопасность и вход</div>
+            <h3>Пароль (PIN)</h3>
+            <p id="pinStatus" class="muted">PIN нужен для входа.</p>
+            <form id="pinForm" class="pin-form">
+              <input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" placeholder="Новый пароль, 4–8 цифр" required>
+              <button class="button secondary" type="submit">Сохранить пароль</button>
+            </form>
+          </article>
+          <article class="card settings-card">
+            <div class="card-kicker">код пары</div>
+            <h3>Код приглашения</h3>
+            <p class="muted">Нужен только для подключения партнёра.</p>
+            <div class="invite-code"><span id="inviteCode">—</span><button id="copyCode" class="quiet-button" type="button">Скопировать</button></div>
+          </article>
+          <article class="card settings-card">
+            <div class="card-kicker">напоминания и браузер</div>
+            <h3>Мягкие подсказки</h3>
+            <label class="toggle-row"><span>Разрешить напоминания</span><input id="nudgeToggle" type="checkbox"><span class="toggle"></span></label>
+            <button id="notificationButton" class="button secondary" type="button">Разрешить уведомления</button>
+          </article>
+          <article class="card settings-card personalize-settings">
+            <div class="card-kicker">только для тебя</div>
+            <h3>Персонализация</h3>
+            <button id="personalizeButton" class="button secondary" type="button">Открыть персонализацию</button>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div id="personalizationModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="personalizationTitle">
+      <div class="modal-card personalization-modal-card">
+        <button class="modal-close" data-close-modal="personalizationModal" aria-label="Закрыть">×</button>
+        <div class="card-kicker">только для этого входа</div>
+        <h3 id="personalizationTitle">Персонализация</h3>
+        <section class="personalization-section" aria-labelledby="themeChoiceTitle">
+          <h4 id="themeChoiceTitle">Тема</h4>
+          <div id="themeChoices" class="theme-choices" role="group" aria-label="Цветовая тема"></div>
+        </section>
+        <section class="personalization-section" aria-labelledby="tabOrderTitle">
+          <h4 id="tabOrderTitle">Порядок вкладок</h4>
+          <div id="tabOrderControls" class="tab-order-controls"></div>
+        </section>
+        <button id="savePersonalizationButton" class="button primary" type="button">Сохранить мой вид</button>
+      </div>
+    </div>
+
+    <div id="partnerProfileModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="partnerProfileTitle">
+      <div class="modal-card partner-profile-modal-card">
+        <button class="modal-close" data-close-modal="partnerProfileModal" aria-label="Закрыть">×</button>
+        <div class="partner-profile-heading">
+          <div><div class="card-kicker">моя личная карточка</div><h3 id="partnerProfileTitle">Карточка партнёра</h3></div>
+          <button class="info-heart-button" data-info-key="partnerProfile" type="button" aria-label="О карточке партнёра" title="О карточке партнёра"><span class="info-pixel-heart" aria-hidden="true"></span></button>
+        </div>
+        <section id="partnerProfileView" class="partner-profile-view" aria-live="polite"></section>
+        <button id="editPartnerProfileButton" class="button secondary partner-profile-edit" type="button">Редактировать</button>
+        <form id="partnerProfileForm" class="partner-profile-form hidden">
+          <div id="partnerProfileFields" class="partner-profile-fields"></div>
+          <div class="partner-profile-actions">
+            <button id="addPartnerFieldButton" class="quiet-button" type="button">＋ Свой пункт</button>
+            <button class="button primary" type="submit">Сохранить карточку</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="anniversaryModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="anniversaryTitle">
+      <div class="modal-card anniversary-modal-card">
+        <button class="modal-close" data-close-modal="anniversaryModal" aria-label="Закрыть">×</button>
+        <div class="anniversary-confetti" aria-hidden="true">✦ 🎀 ✦ 🎉 ✦</div>
+        <div class="card-kicker">ваша дата</div>
+        <h3 id="anniversaryTitle">26 марта — ваш день</h3>
+        <p id="anniversaryLead" class="anniversary-lead">Вы вместе с 26.03.2025.</p>
+        <p id="anniversaryCallout" class="anniversary-callout hidden">Пора праздновать и планировать ✨</p>
+        <div class="anniversary-countdown">
+          <strong id="anniversaryDays">—</strong>
+          <span id="anniversaryCountdownLabel">до следующей годовщины</span>
+        </div>
+        <p id="anniversaryPlanText" class="anniversary-plan-text">Выберите идею для вашего дня.</p>
+        <form id="anniversaryIdeaForm" class="anniversary-idea-form">
+          <textarea name="text" maxlength="500" rows="2" placeholder="Идея для 26 марта…" required></textarea>
+          <button class="button primary" type="submit">Сохранить идею ✨</button>
+        </form>
+        <div id="anniversaryIdeasList" class="anniversary-ideas-list"></div>
+        <details id="anniversaryHiddenIdeasDetails" class="anniversary-hidden-ideas hidden">
+          <summary>Показать скрытые идеи</summary>
+          <div id="anniversaryHiddenIdeasList" class="anniversary-ideas-list"></div>
+        </details>
+      </div>
+    </div>
+
+    <div id="infoModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+      <div class="modal-card info-modal-card">
+        <button class="modal-close" data-close-modal="infoModal" aria-label="Закрыть">×</button>
+        <div class="card-kicker">коротко о разделе</div>
+        <h3 id="infoTitle">Подсказка</h3>
+        <div id="infoModalBody" class="info-modal-body"></div>
+      </div>
+    </div>
+
+    <main class="app-main">
+      <section class="welcome-row">
+        <div class="welcome-copy">
+          <div class="welcome-copy-text">
+            <p class="eyebrow">ваше пространство</p>
+            <h2>Что хочется оставить здесь?</h2>
+            <p class="muted">Сохраняйте мысли до разговора.</p>
+          </div>
+          <div class="welcome-kitten" aria-hidden="true">
+            <svg viewBox="0 0 164 154" xmlns="http://www.w3.org/2000/svg" focusable="false">
+              <defs>
+                <linearGradient id="welcomeKittenFur" x1="0" y1="0" x2="1" y2="1">
+                  <stop stop-color="#ffc2df"/><stop offset="1" stop-color="#cbb6f4"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="83" cy="141" rx="54" ry="7" fill="#d8bce9" opacity=".25"/>
+              <path d="M117 126 C155 141 158 103 140 103 C128 103 130 115 138 115" fill="none" stroke="#c2a4e8" stroke-width="11" stroke-linecap="round"/>
+              <path d="M52 102 Q40 118 48 137 Q80 146 116 137 Q125 118 112 102" fill="url(#welcomeKittenFur)" stroke="#b58acf" stroke-width="2.5"/>
+              <path d="M31 60 L37 20 Q39 15 44 20 L64 37 Q81 30 101 37 L123 20 Q128 16 129 22 L134 62 Q138 103 83 109 Q28 106 31 60Z" fill="url(#welcomeKittenFur)" stroke="#b58acf" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M42 31 L46 49 L58 42Z M120 31 L108 43 L124 49Z" fill="#f293c2" opacity=".8"/>
+              <path d="M56 68 Q63 60 70 68 M96 68 Q103 60 110 68" fill="none" stroke="#713e69" stroke-width="3.3" stroke-linecap="round"/>
+              <ellipse cx="50" cy="79" rx="10" ry="5" fill="#ee8fbc" opacity=".52"/><ellipse cx="116" cy="79" rx="10" ry="5" fill="#ee8fbc" opacity=".52"/>
+              <path d="M79 74 Q83 71 87 74 L83 79Z" fill="#a25789"/>
+              <path d="M83 79 Q79 87 73 82 M83 79 Q87 87 93 82 M57 78 L35 74 M57 84 L35 88 M108 78 L131 74 M108 84 L131 88" fill="none" stroke="#713e69" stroke-width="1.9" stroke-linecap="round"/>
+              <path d="M83 116 C68 97 52 116 83 136 C114 116 98 97 83 116Z" fill="#e987bc" stroke="#d06da6" stroke-width="1.5"/>
+              <path d="M56 112 Q56 125 68 124 M109 112 Q110 125 98 124" fill="none" stroke="#b58acf" stroke-width="6" stroke-linecap="round"/>
+              <path d="M16 42 L18 36 L20 42 L26 44 L20 46 L18 52 L16 46 L10 44Z" fill="#d2b7ef"/>
+              <path d="M145 62 C136 52 132 64 145 71 C158 64 154 52 145 62Z" fill="#efa6cf"/>
+              <circle cx="139" cy="25" r="3" fill="#cdb3eb"/>
+            </svg>
+          </div>
+        </div>
+        <div class="partner-shortcut">
+          <button id="partnerBadge" class="partner-badge" type="button" aria-haspopup="dialog" aria-controls="partnerProfileModal" title="Открыть карточку партнёра">Вместе</button>
+        </div>
+      </section>
+
+      <section id="inviteBanner" class="invite-banner hidden">
+        <div><strong>Остался один шаг</strong><span>Передай этот код партнёру, чтобы открыть ящик вместе.</span></div>
+        <div class="invite-inline"><b id="inviteBannerCode">—</b><button id="copyBannerCode" class="quiet-button" type="button">Скопировать</button></div>
+      </section>
+
+      <nav class="main-tabs" aria-label="Разделы">
+        <button class="main-tab active" data-view="mailbox" type="button">✍️ Ящик</button>
+        <button class="main-tab" data-view="dates" type="button">💗 Свидания</button>
+        <button class="main-tab" data-view="our" type="button">🌷 Наше</button>
+        <button class="main-tab" data-view="games" type="button">🐱 Игры</button>
+      </nav>
+
+      <nav id="mailboxSubnav" class="mailbox-subnav" aria-label="Разделы ящика">
+        <button class="mailbox-subtab active" data-mailbox-view="mailbox" type="button">✍️ Ящик</button>
+        <button class="mailbox-subtab" data-mailbox-view="conversation" type="button">💬 Разговор</button>
+        <button class="mailbox-subtab" data-mailbox-view="homework" type="button">🧊 Домашнее задание</button>
+        <button class="mailbox-subtab" data-mailbox-view="capsule" type="button">💌 Капсула тепла</button>
+      </nav>
+
+      <section id="mailboxView" class="view active">
+        <div class="grid-layout">
+          <article class="write-card card info-card-host">
+            <button id="activeViewInfoBtn" class="info-heart-button active-view-info-button" data-info-key="mailbox" type="button" aria-label="Открыть подсказку раздела" title="О разделе">
+              <span class="info-pixel-heart" aria-hidden="true"></span>
+            </button>
+            <div class="card-kicker">новая запись</div>
+            <div class="category-switch" role="group" aria-label="Категория записи">
+              <button class="category-button selected" data-category="sweet" type="button">🍬 <span>Сладость</span></button>
+              <button class="category-button" data-category="hard" type="button">🧊 <span>Гадость</span></button>
+            </div>
+            <textarea id="noteBody" maxlength="3500" placeholder="Напиши сюда то, что хочется сохранить…"></textarea>
+            <div class="write-footer">
+              <span id="charCount" class="char-count">0 / 3500</span>
+              <button id="saveNote" class="button primary" type="button">Сохранить в ящик <span>↗</span></button>
+            </div>
+            <p id="writeHint" class="small-note">Партнёр увидит запись в выбранный день.</p>
+            <article id="encouragementCard" class="encouragement-card card hidden" aria-live="polite">
+              <div class="mini-cat" aria-hidden="true">🐱</div>
+              <div id="encouragementText">Здесь можно быть честными. Даже маленький шаг уже считается.</div>
+            </article>
+          </article>
+
+          <aside class="side-column">
+            <article class="count-card card">
+              <div class="card-kicker">только твоё</div>
+              <div class="count-row"><span>🍬 Мои сладости</span><strong id="sweetCount">0</strong></div>
+              <div class="count-row"><span>🧊 Мои гадости</span><strong id="hardCount">0</strong></div>
+              <p class="small-note">Партнёр видит только свои счётчики.</p>
+              <div id="scheduledMini" class="scheduled-mini"></div>
+            </article>
+            <article id="cycleCard" class="cycle-card card hidden"></article>
+          </aside>
+        </div>
+        <section id="achievementStrip" class="achievement-strip hidden"></section>
+      </section>
+
+      <section id="conversationView" class="view hidden">
+        <article class="date-controls-card card">
+          <div class="card-kicker">разговор</div>
+          <h3>Когда поговорить?</h3>
+          <label class="date-label">День разговора
+            <input id="scheduleInput" type="date">
+          </label>
+          <button id="scheduleButton" class="button primary" type="button">Сохранить дату</button>
+          <button id="talkNowButton" class="button talk-now" type="button">Поговорить сейчас</button>
+          <p class="small-note">Часовой пояс: <span id="timezoneLabel">Europe/Amsterdam</span></p>
+        </article>
+        <article id="conversationEmpty" class="card conversation-empty">
+          <div class="card-kicker">когда наступит ваш день</div>
+          <h3>Здесь появится ваш разговор</h3>
+          <p class="muted">Выберите дату или откройте сейчас.</p>
+        </article>
+        <section id="revealedSection" class="revealed-section hidden">
+          <div class="section-heading"><div><div class="card-kicker">время поговорить</div><h3>Записи из ящика</h3></div><span class="open-mark">открыто</span></div>
+          <div id="notesList" class="notes-list"></div>
+          <article id="talkOutcomeCard" class="talk-outcome-card">
+            <div class="card-kicker">маленький итог</div>
+            <h3>Удалось решить вопрос?</h3>
+            <p class="muted">Отметьте итог.</p>
+            <div id="talkOutcomeActions" class="outcome-actions">
+              <button class="button outcome-yes" data-outcome="resolved" type="button">Да, решили ✨</button>
+              <button class="button outcome-no" data-outcome="not_yet" type="button">Пока нет 🤍</button>
+            </div>
+            <div id="talkOutcomeMessage" class="outcome-message hidden"></div>
+          </article>
+          <div class="finish-row"><button id="finishButton" class="button danger" type="button">Завершить текущий цикл</button><span>Оставшиеся записи исчезнут. Созданные домашние задания сохранятся.</span></div>
+        </section>
+      </section>
+
+      <section id="homeworkView" class="view hidden">
+        <article id="homeworkEmpty" class="card homework-empty">
+          <div class="card-kicker">бережно и отдельно</div>
+          <h3>Домашние задания</h3>
+          <p class="muted">Здесь будут темы для разбора вдвоём.</p>
+        </article>
+        <article id="homeworkCard" class="homework-card card hidden">
+          <div class="card-kicker">если пока не получилось</div>
+          <h3>Разберём одну гадость отдельно?</h3>
+          <p class="muted">Ответы откроются после двух отправок.</p>
+          <div id="homeworkPicker" class="homework-picker"></div>
+          <div id="homeworkActive" class="hidden"></div>
+        </article>
+      </section>
+
+      <section id="capsuleView" class="view hidden">
+        <article class="card capsule-card">
+          <div class="card-kicker">доброе, которое хочется сохранить</div>
+          <h3>Капсула тепла</h3>
+          <p class="muted">Сохраняйте тёплые моменты.</p>
+          <button id="openCapsuleButton" class="button primary" type="button">Открыть случайную запись ✨</button>
+          <div id="capsuleResult" class="capsule-result hidden"></div>
+          <details class="our-details">
+            <summary>Добавить тёплую запись вручную</summary>
+            <form id="capsuleForm" class="our-form">
+              <textarea name="text" maxlength="3500" placeholder="Например: сегодня Саняня прислал мне тёплый кружочек, когда я устала" required></textarea>
+              <button class="button secondary" type="submit">Спрятать в капсулу</button>
+            </form>
+          </details>
+          <details class="our-details">
+            <summary>Посмотреть капсулу</summary>
+            <div id="capsuleList" class="our-list"></div>
+          </details>
+        </article>
+      </section>
+
+      <section id="datesView" class="view hidden">
+        <div class="date-subtabs" role="tablist" aria-label="Свидания">
+          <button class="date-subtab active" data-date-subtab="random" type="button">🎲 Случайная идея</button>
+          <button class="date-subtab" data-date-subtab="successful" type="button">🌟 Удавшиеся свидания</button>
+        </div>
+        <div id="dateRandomPanel" class="date-subpanel">
+          <div class="ideas-hero card">
+            <div class="card-kicker">маленькие планы для двоих</div>
+            <h3>Куда пойдём на свидание?</h3>
+            <p class="muted">Выберите настроение и место.</p>
+            <div class="date-choice-groups" aria-label="Настроение и место свидания">
+              <div class="date-choice-group">
+                <span>Как хочется?</span>
+                <div class="date-choice-buttons">
+                  <button class="date-choice-button" data-date-kind="budget" type="button">🌷 Уютно</button>
+                  <button class="date-choice-button pinker" data-date-kind="treat" type="button">✨ Особенно</button>
+                </div>
+              </div>
+              <div class="date-choice-group">
+                <span>Где?</span>
+                <div class="date-choice-buttons">
+                  <button class="date-choice-button" data-date-place="outside" type="button">🌿 Снаружи</button>
+                  <button class="date-choice-button pinker" data-date-place="inside" type="button">🫖 Внутри</button>
+                </div>
+              </div>
+            </div>
+            <div id="dateIdeaHint" class="small-note">Выберите настроение и место.</div>
+            <div id="dateIdeaResult" class="idea-result hidden"></div>
+          </div>
+          <div class="ideas-tools card">
+            <details>
+              <summary>Добавить свою идею в общий мешочек</summary>
+              <form id="dateIdeaForm" class="idea-form">
+                <select name="kind" aria-label="Настроение свидания">
+                  <option value="budget">Уютно</option>
+                  <option value="treat">Особенно</option>
+                </select>
+                <select name="place" aria-label="Место свидания">
+                  <option value="outside">Снаружи</option>
+                  <option value="inside">Внутри</option>
+                </select>
+                <textarea name="text" maxlength="300" rows="3" placeholder="Например: поехать смотреть закат" required></textarea>
+                <button class="button secondary" type="submit">Спрятать в мешочек</button>
+              </form>
+            </details>
+            <details id="dateIdeasManage" class="manage-details">
+              <summary>Убрать идеи, которые совсем не нравятся</summary>
+              <div id="dateIdeasList" class="custom-ideas-list"><p class="small-note">Загружаю ваши идеи…</p></div>
+            </details>
+          </div>
+        </div>
+        <div id="successfulDatesPanel" class="date-subpanel hidden">
+          <article class="successful-intro card">
+            <div class="card-kicker">ваша маленькая история</div>
+            <h3>То, что захотелось повторить</h3>
+            <p class="muted">Сохраняйте любимые свидания.</p>
+          </article>
+          <div id="successfulDatesList" class="successful-dates-list"></div>
+        </div>
+      </section>
+
+      <section id="ourView" class="view hidden">
+        <div class="our-grid">
+          <article class="card decisions-card">
+            <div class="card-kicker">когда никак не выбрать</div>
+            <h3>Выбирает котик</h3>
+            <p class="muted">Выберите тип — котик решит.</p>
+            <div class="decision-choice-row">
+              <label>Тип вопроса
+                <select id="decisionKind" name="kind" aria-label="Тип решения"></select>
+              </label>
+              <button id="chooseDecisionButton" class="button primary" type="button">Выбрать ответ 🎲</button>
+            </div>
+            <div id="decisionResult" class="decision-result hidden"></div>
+            <details class="decision-custom-details">
+              <summary>Добавить свой вариант</summary>
+              <form id="decisionForm" class="our-form decision-custom-form">
+                <select name="kind" aria-label="Тип своего варианта"></select>
+                <textarea name="text" maxlength="300" rows="3" placeholder="Ваш вариант" required></textarea>
+                <button class="button secondary" type="submit">Добавить</button>
+              </form>
+              <p class="small-note decision-note">Любой вариант можно убрать.</p>
+            </details>
+            <details id="decisionOptionsDetails" class="decision-options-details hidden">
+              <summary>Показать ответы и свои варианты</summary>
+              <div id="decisionsList" class="our-list"></div>
+            </details>
+          </article>
+
+          <article class="card agreements-card">
+            <div class="card-kicker">после разговоров</div>
+            <h3>Наши договорённости</h3>
+            <p class="muted">Решения, о которых важно помнить.</p>
+            <form id="agreementForm" class="our-form">
+              <textarea name="text" maxlength="500" placeholder="Например: если оба устали, сначала заказываем еду, а не спорим о готовке" required></textarea>
+              <button class="button secondary" type="submit">Добавить договорённость</button>
+            </form>
+            <details id="agreementsDetails" class="list-details" data-list-label="договорённости"><summary>Показать договорённости</summary><div id="agreementsList" class="our-list"></div></details>
+          </article>
+
+          <article class="card wishes-card">
+            <div class="card-kicker">маленькие и большие «хочу»</div>
+            <h3>Лист желаний</h3>
+            <p class="muted">Скрытые желания не видны партнёру.</p>
+            <form id="wishForm" class="our-form wish-form" data-wish-kind="general">
+              <textarea name="text" maxlength="500" rows="3" placeholder="Например: хочу однажды проснуться рядом с тобой…" required></textarea>
+              <button class="button secondary" type="submit">Добавить желание</button>
+            </form>
+            <details id="wishListDetails" class="list-details" data-list-label="желания"><summary>Показать желания</summary>
+            <div class="wish-columns">
+              <section class="wish-column">
+                <h4 id="wishMineTitle">Мои желания</h4>
+                <div id="wishMineList" class="wish-list"></div>
+              </section>
+              <section class="wish-column">
+                <h4 id="wishPartnerTitle">Желания партнёра</h4>
+                <div id="wishPartnerList" class="wish-list"></div>
+              </section>
+            </div>
+            <details id="wishHiddenDetails" class="wish-hidden-details hidden">
+              <summary>Показать скрытые желания</summary>
+              <div id="wishHiddenList" class="wish-list"></div>
+            </details>
+            </details>
+            <p id="wishHint" class="small-note wish-hint">Желания можно скрыть или отметить.</p>
+          </article>
+
+          <article class="card wishes-card intimate-wishes-card">
+            <div class="card-kicker">только между вами</div>
+            <h3>Сексуальные желания</h3>
+            <p class="muted">Новые записи скрыты по умолчанию.</p>
+            <form id="intimateWishForm" class="our-form wish-form" data-wish-kind="intimate">
+              <textarea name="text" maxlength="500" rows="3" placeholder="Например: хочу попробовать…" required></textarea>
+              <button class="button secondary" type="submit">Добавить желание</button>
+            </form>
+            <details id="intimateWishListDetails" class="list-details" data-list-label="желания"><summary>Показать желания</summary>
+            <div class="wish-columns">
+              <section class="wish-column">
+                <h4 id="intimateWishMineTitle">Мои желания</h4>
+                <div id="intimateWishMineList" class="wish-list"></div>
+              </section>
+              <section class="wish-column">
+                <h4 id="intimateWishPartnerTitle">Желания партнёра</h4>
+                <div id="intimateWishPartnerList" class="wish-list"></div>
+              </section>
+            </div>
+            <details id="intimateWishHiddenDetails" class="wish-hidden-details hidden">
+              <summary>Показать скрытые желания</summary>
+              <div id="intimateWishHiddenList" class="wish-list"></div>
+            </details>
+            <p id="intimateWishHint" class="small-note wish-hint">Запись можно открыть или скрыть.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="gamesView" class="view hidden" aria-labelledby="gamesTitle">
+        <div id="gamesSubnav" class="games-subtabs" role="tablist" aria-label="Мини-игры">
+          <button class="game-subtab active" data-game-subtab="truths" type="button">💌 Две правды и мечта</button>
+          <button class="game-subtab" data-game-subtab="runner" type="button">Любимое село</button>
+          <button class="game-subtab" data-game-subtab="tictactoe" type="button">🐾 Крестики-нолики</button>
+        </div>
+
+        <div id="gameTruthsPanel" class="game-subpanel">
+          <article class="card games-page-card">
+            <div class="games-modal-heading">
+              <span class="games-modal-cat" aria-hidden="true">💌</span>
+              <div>
+                <div class="card-kicker">игра для двоих</div>
+                <h3 id="gamesTitle">Две правды и одна мечта</h3>
+              </div>
+              <div class="game-header-actions">
+                <button class="info-heart-button game-info-button" data-info-key="truths" type="button" aria-label="Правила игры «Две правды и одна мечта»" title="Правила игры"><span class="info-pixel-heart" aria-hidden="true"></span></button>
+              </div>
+            </div>
+            <div id="truthsScoreBadge" class="game-score">Угадано мечт: ты — 0 · партнёр — 0</div>
+
+            <div id="truthsActiveArea" class="truths-active-area"></div>
+
+            <div class="truths-builder-card">
+              <div class="truths-builder-header">
+                <h4>Загадать раунд</h4>
+                <button id="truthTopicBtn" class="quiet-button topic-hint-btn" type="button">✨ Тема</button>
+              </div>
+              <p id="truthTopicHint" class="truth-topic-banner hidden"></p>
+              <form id="truthsCreateForm" class="truths-form">
+                <label>Первая правда
+                  <textarea id="truthInput1" name="truth1" rows="2" maxlength="350" placeholder="Напиши факт или воспоминание" required></textarea>
+                </label>
+                <label>Вторая правда
+                  <textarea id="truthInput2" name="truth2" rows="2" maxlength="350" placeholder="Напиши ещё один факт" required></textarea>
+                </label>
+                <label>Мечта
+                  <textarea id="dreamInput" name="dream" rows="2" maxlength="350" placeholder="Напиши желание" required></textarea>
+                </label>
+                <button class="button primary" type="submit">Загадать 💌</button>
+              </form>
+            </div>
+
+            <details id="truthsHistoryDetails" class="list-details truths-history-details">
+              <summary>История разгаданных раундов</summary>
+              <div id="truthsHistoryList" class="truths-history-list"></div>
+            </details>
+            <div class="game-bottom-utilities truths-bottom-utilities">
+              <button id="truthsResetBtn" class="game-restart-button truths-reset-btn" type="button" aria-label="Сбросить историю раундов" title="Сбросить историю">↻</button>
+              <button class="game-fullscreen-button game-bottom-fullscreen" data-fullscreen-target="gameTruthsPanel" type="button" aria-label="Развернуть игру на весь экран" title="На весь экран">⛶</button>
+            </div>
+          </article>
+        </div>
+
+        <div id="gameRunnerPanel" class="game-subpanel hidden" tabindex="-1">
+          <article class="card games-page-card">
+            <div class="games-modal-heading">
+              <span class="games-modal-cat runner-heading-icon" aria-hidden="true"><img src="/assets/runner-cow.svg" alt=""></span>
+              <div>
+                <div class="card-kicker">бесконечное поле</div>
+                <h3>Любимое село</h3>
+              </div>
+              <div class="game-header-actions">
+                <button class="info-heart-button game-info-button" data-info-key="runner" type="button" aria-label="Правила игры «Любимое село»" title="Правила игры"><span class="info-pixel-heart" aria-hidden="true"></span></button>
+              </div>
+            </div>
+
+            <div class="runner-scoreline" aria-label="Время, очки и рекорды забега">
+              <div class="runner-time-score"><strong id="runnerClock">00:00 · 0 очков</strong></div>
+              <div id="runnerRecordBadge" class="runner-record-badge" aria-label="Рекорды забега">
+                <span class="runner-record-caption">Рекорд</span>
+                <span class="runner-record-slot"><strong id="runnerMyRecord">0</strong><small>мой</small></span>
+                <span class="runner-record-slot"><strong id="runnerPartnerRecord">0</strong><small>партнёра</small></span>
+              </div>
+            </div>
+
+            <div id="runnerStage" class="runner-stage" tabindex="0" role="application" aria-label="Игровое поле Любимое село">
+              <canvas id="runnerCanvas" width="680" height="250"></canvas>
+              <div id="runnerOverlay" class="runner-overlay">
+                <h4 id="runnerOverlayTitle">Любимое село</h4>
+                <p id="runnerOverlayText" class="runner-overlay-text"></p>
+                <button id="runnerStartBtn" class="button primary" type="button">Начать</button>
+              </div>
+            </div>
+
+            <div class="runner-controls-row">
+              <div class="runner-utility-buttons">
+                <button id="runnerRestartBtn" class="game-restart-button runner-restart-btn" type="button" title="Начать заново" aria-label="Начать забег заново">↻</button>
+                <button class="game-fullscreen-button runner-fullscreen-button" data-fullscreen-target="gameRunnerPanel" type="button" aria-label="Развернуть игру на весь экран" title="На весь экран">⛶</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div id="gameTictactoePanel" class="game-subpanel hidden">
+          <article class="card games-page-card">
+            <div class="games-modal-heading">
+              <span class="games-modal-cat" aria-hidden="true">🐾</span>
+              <div>
+                <div class="card-kicker">обычная партия</div>
+                <h3>Крестики-нолики</h3>
+              </div>
+              <div class="game-header-actions">
+                <button class="info-heart-button game-info-button" data-info-key="tictactoe" type="button" aria-label="Правила крестиков-ноликов" title="Правила игры"><span class="info-pixel-heart" aria-hidden="true"></span></button>
+              </div>
+            </div>
+
+            <div class="ttt-mode-switch" role="group" aria-label="Режим игры">
+              <button class="ttt-mode-btn active" data-ttt-mode="bot" type="button" title="Против Кибер-партнёра">Бот</button>
+              <button class="ttt-mode-btn" data-ttt-mode="local" type="button" title="Вдвоём на одном экране">Вдвоём</button>
+              <button class="ttt-mode-btn" data-ttt-mode="online" type="button" title="Через общий ящик">Онлайн</button>
+            </div>
+
+            <div class="ttt-scoreboard" aria-label="Счёт: твои очки слева, очки соперника справа">
+              <div class="ttt-score-pill ttt-score-cat" aria-label="Твои очки"><strong id="tttCatScore">0</strong></div>
+              <div class="ttt-score-pill ttt-score-heart" aria-label="Очки соперника"><strong id="tttHeartScore">0</strong></div>
+            </div>
+
+            <div id="tttStatusBanner" class="ttt-status-banner">Твой ход</div>
+
+            <div id="tttBoard" class="ttt-board" role="grid" aria-label="Поле 3 на 3">
+              <button class="ttt-cell" data-ttt-cell="0" type="button" aria-label="Клетка 1"></button>
+              <button class="ttt-cell" data-ttt-cell="1" type="button" aria-label="Клетка 2"></button>
+              <button class="ttt-cell" data-ttt-cell="2" type="button" aria-label="Клетка 3"></button>
+              <button class="ttt-cell" data-ttt-cell="3" type="button" aria-label="Клетка 4"></button>
+              <button class="ttt-cell" data-ttt-cell="4" type="button" aria-label="Клетка 5"></button>
+              <button class="ttt-cell" data-ttt-cell="5" type="button" aria-label="Клетка 6"></button>
+              <button class="ttt-cell" data-ttt-cell="6" type="button" aria-label="Клетка 7"></button>
+              <button class="ttt-cell" data-ttt-cell="7" type="button" aria-label="Клетка 8"></button>
+              <button class="ttt-cell" data-ttt-cell="8" type="button" aria-label="Клетка 9"></button>
+            </div>
+
+            <div class="ttt-footer-row">
+              <div class="game-bottom-utilities ttt-bottom-utilities">
+                <button id="tttResetBtn" class="game-restart-button" type="button" aria-label="Начать новую партию" title="Новая партия">↻</button>
+                <button class="game-fullscreen-button game-bottom-fullscreen" data-fullscreen-target="gameTictactoePanel" type="button" aria-label="Развернуть игру на весь экран" title="На весь экран">⛶</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+  </section>
+  <script src="/app.js"></script>
+</body>
+</html>

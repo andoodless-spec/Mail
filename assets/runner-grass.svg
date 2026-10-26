@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 58" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельная травка</title><desc id="desc">Свежий пучок травы как игровой буст</desc>
+  <path d="M9 50h9V35h6v15h6V20h7v30h5V13h8v37h5V26h7v24h7v6H9z" fill="#4d9b48"/>
+  <path d="M16 50V39h5v11h6V28h6v22h6V19h6v31h7V30h6v20" fill="none" stroke="#28713a" stroke-width="3"/>
+  <path d="M21 48h10v-9h6v9h11v-13h6v13h12v5H15z" fill="#83c95a"/>
+</svg>

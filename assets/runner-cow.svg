@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 96" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">Пиксельная коровка</title>
+  <desc id="desc">Бегущая белая коровка с прямыми ушами, короткими рожками и крупной коровьей мордочкой</desc>
+  <!-- tail -->
+  <path d="M18 46H9v-8H5v-8h6v8h9v7h6v8h-8z" fill="#60483b"/>
+  <rect x="16" y="53" width="10" height="10" fill="#fff8e7"/>
+  <!-- rear legs: first running pose -->
+  <path d="M34 65h12v18h-6v7H27v-7h7zM72 65h12v18h8v7H72v-7h1z" fill="#fff8e7"/>
+  <path d="M27 84h14v7H24v-5h3zM72 84h20v7H72z" fill="#4e3c35"/>
+  <!-- large spotted body -->
+  <path d="M24 38h13v-6h43v5h18v7h9v25h-8v7H84v5H37v-5H24v-8h-7V48h7z" fill="#fff8e7"/>
+  <path d="M24 38h13v-6h43v5h18v7h9v25h-8v7H84v5H37v-5H24v-8h-7V48h7z" fill="none" stroke="#59453b" stroke-width="4"/>
+  <path d="M34 41h19v8h8v11H43v-5H34zM67 64h20v11H72v-6h-5z" fill="#493936"/>
+  <!-- neck -->
+  <path d="M87 31h17v39H88z" fill="#fff8e7" stroke="#59453b" stroke-width="4"/>
+  <!-- unmistakable square cow head -->
+  <path d="M101 20h22v5h8v8h6v24h-6v8h-9v7h-19v-5h-7V28h5z" fill="#fff8e7" stroke="#59453b" stroke-width="4"/>
+  <!-- short straight horns, ears and pink inner ears -->
+  <path d="M102 25H91v-9h8v4h8zM122 25h12v-9h-8v4h-8z" fill="#d8aa62"/>
+  <path d="M101 27H91v8h10zM123 27h11v8h-11z" fill="#e9adb9" stroke="#59453b" stroke-width="3"/>
+  <!-- wide forehead patch, white eyes, pink muzzle -->
+  <path d="M104 31h17v6h6v15h-6v5h-17v-5h-6V37h6z" fill="#e9dcc2"/>
+  <rect x="104" y="36" width="9" height="11" fill="#fffdf8"/><rect x="107" y="39" width="3" height="5" fill="#2d2928"/>
+  <rect x="116" y="36" width="9" height="11" fill="#fffdf8"/><rect x="119" y="39" width="3" height="5" fill="#2d2928"/>
+  <path d="M107 51h13v8h-13z" fill="#e798a7"/><rect x="109" y="53" width="3" height="2" fill="#66474b"/><rect x="116" y="53" width="3" height="2" fill="#66474b"/>
+  <!-- front legs, planted pose -->
+  <path d="M88 66h11v13h-5v10H81v-7h7zM55 68h11v12h7v9H59v-7h-4z" fill="#fff8e7"/>
+  <path d="M81 84h14v7H79v-5h2zM59 84h15v7H57v-5h2z" fill="#4e3c35"/>
+  <!-- collar bell -->
+  <rect x="89" y="58" width="11" height="5" fill="#d5aa40"/><rect x="92" y="63" width="5" height="5" fill="#d5aa40"/>
+</svg>
