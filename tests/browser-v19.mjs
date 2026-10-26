@@ -83,6 +83,37 @@ for (const width of [1280, 390]) {
     return `${style.backgroundImage}|${style.backgroundColor}|${style.borderColor}|${style.color}`;
   }));
   assert.deepEqual(blueThemePaint.map((value, index) => value !== pinkThemePaint[index]), [true, true, true], 'cards and every sampled secondary control follow the saved account theme');
+  const paletteCoverage = await page.evaluate(async () => {
+    const themes = ['white', 'pink', 'purple', 'blue', 'yellow', 'cyan'];
+    const selectors = [
+      '.write-card', '.write-card textarea', '.mailbox-subtab', '#topMenuButton',
+      '#agreementsDetails > summary', '#infoModal .info-modal-body p',
+      '#tttBoard .ttt-cell', '#gameRunnerPanel .runner-time-record-pill',
+    ];
+    const before = document.documentElement.dataset.theme;
+    const paint = (selector) => {
+      const el = document.querySelector(selector);
+      const style = getComputedStyle(el);
+      return { color: style.backgroundColor, image: style.backgroundImage, border: style.borderColor, display: style.display };
+    };
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const snapshots = {};
+    for (const theme of themes) {
+      document.documentElement.dataset.theme = theme;
+      await nextFrame();
+      snapshots[theme] = Object.fromEntries(selectors.map((selector) => [selector, paint(selector)]));
+    }
+    document.documentElement.dataset.theme = before;
+    await nextFrame();
+    return { themes, selectors, snapshots };
+  });
+  for (const selector of paletteCoverage.selectors) {
+    const paints = paletteCoverage.themes.map((theme) => paletteCoverage.snapshots[theme][selector]);
+    assert(paints.every((paint) => paint.color !== 'rgba(0, 0, 0, 0)' || paint.image !== 'none'), `${selector} always has a filled themed surface`);
+    assert(paints.every((paint) => !/rgb\(255,\s*255,\s*255\)/.test(`${paint.color}|${paint.image}`)), `${selector} has no generic white window in any account theme`);
+    assert(new Set(paints.map((paint) => `${paint.color}|${paint.image}|${paint.border}`)).size >= 4, `${selector} visibly follows the individual account palettes`);
+  }
+  assert.equal(paletteCoverage.snapshots.purple['#agreementsDetails > summary'].display, 'block', 'closed accordions receive a real palette-filled summary strip');
   const settingsGeometry = await page.locator('#settingsModal .settings-modal-card').evaluate((card) => {
     const box = card.getBoundingClientRect();
     return { left: box.left, right: box.right, width: box.width, scrollWidth: document.querySelector('#settingsModal').scrollWidth, viewport: innerWidth };
@@ -173,34 +204,55 @@ for (const width of [1280, 390]) {
   const runnerPanelText = await page.locator('#gameRunnerPanel').textContent();
   assert.match(runnerPanelText, /Любимое село/);
   assert.doesNotMatch(runnerPanelText, /Питер|Тюмень|км|6:00|Прыжок/);
-  assert.equal(await page.locator('.runner-route-btn, #runnerJumpBtn, #runnerTime, #runnerKmLeft, #runnerLives, #runnerScore').count(), 0);
-  assert.match(await page.locator('#runnerClock').textContent(), /00:00.*0 очков/);
-  assert.match(await page.locator('#runnerRecordBadge').textContent(), /Рекорд/);
-  assert.equal(await page.locator('#runnerMyRecord').textContent(), '0');
-  assert.equal(await page.locator('#runnerPartnerRecord').textContent(), '0');
-  assert.deepEqual(await page.locator('#runnerRecordBadge .runner-record-slot small').allTextContents(), ['мой', 'партнёра']);
+  assert.equal(await page.locator('.runner-route-btn, #runnerJumpBtn, #runnerTime, #runnerKmLeft, #runnerLives').count(), 0);
+  assert.equal(await page.locator('#runnerScore').textContent(), '0 очков');
+  assert.equal(await page.locator('#runnerClock').textContent(), '00:00');
+  assert.equal(await page.locator('#runnerRecord').textContent(), '0');
+  const runnerHudText = await page.locator('#gameRunnerPanel .runner-scoreline').textContent();
+  assert.doesNotMatch(runnerHudText, /мой|партнёра|рекорд/i, 'the compact HUD contains only its values, never owner labels');
+  assert.equal(await page.locator('#runnerMyRecord, #runnerPartnerRecord, .runner-record-slot, .runner-record-caption').count(), 0);
   const runnerPills = await page.evaluate(() => {
     const scoreline = document.querySelector('#gameRunnerPanel .runner-scoreline');
-    const time = document.querySelector('#gameRunnerPanel .runner-time-score');
-    const record = document.querySelector('#runnerRecordBadge');
-    const timeBox = time.getBoundingClientRect(); const recordBox = record.getBoundingClientRect();
+    const score = document.querySelector('#gameRunnerPanel .runner-score-pill');
+    const timeRecord = document.querySelector('#gameRunnerPanel .runner-time-record-pill');
+    const scoreBox = score.getBoundingClientRect(); const timeRecordBox = timeRecord.getBoundingClientRect();
     return {
       display: getComputedStyle(scoreline).display,
       wrap: getComputedStyle(scoreline).flexWrap,
-      timeRadius: getComputedStyle(time).borderRadius,
-      recordRadius: getComputedStyle(record).borderRadius,
-      sameLine: Math.abs(timeBox.top - recordBox.top) < 2,
+      scoreRadius: getComputedStyle(score).borderRadius,
+      timeRecordRadius: getComputedStyle(timeRecord).borderRadius,
+      sameLine: Math.abs(scoreBox.top - timeRecordBox.top) < 2,
       fits: scoreline.scrollWidth <= scoreline.clientWidth + 1,
-      separate: getComputedStyle(time).borderStyle !== 'none' && getComputedStyle(record).borderStyle !== 'none',
+      separate: getComputedStyle(score).borderStyle !== 'none' && getComputedStyle(timeRecord).borderStyle !== 'none',
+      values: [score.textContent.trim(), timeRecord.textContent.replace(/\s+/g, ' ').trim()],
     };
   });
   assert.equal(runnerPills.display, 'flex');
   assert.equal(runnerPills.wrap, 'nowrap');
-  assert.equal(runnerPills.sameLine, true, 'time/score and records stay in one visual line');
+  assert.equal(runnerPills.sameLine, true, 'score and time/record stay in one visual line');
   assert.equal(runnerPills.fits, true, `runner pills fit at ${width}px`);
-  assert.equal(runnerPills.separate, true, 'time/score and records have independent outlines');
-  assert.match(runnerPills.timeRadius, /999/);
-  assert.match(runnerPills.recordRadius, /999/);
+  assert.equal(runnerPills.separate, true, 'score and time/record have independent outlines');
+  assert.match(runnerPills.scoreRadius, /999/);
+  assert.match(runnerPills.timeRecordRadius, /999/);
+  assert.deepEqual(runnerPills.values, ['0 очков', '00:00 · 0']);
+  const liveHud = await page.evaluate(() => {
+    runnerGame = createRunnerState();
+    runnerMyBestScore = 42;
+    runnerGame.elapsedMs = 1100;
+    runnerGame.bonusScore = 8;
+    updateRunnerHud();
+    return {
+      score: document.querySelector('#runnerScore').textContent,
+      time: document.querySelector('#runnerClock').textContent,
+      record: document.querySelector('#runnerRecord').textContent,
+      aria: document.querySelector('#runnerRecordBadge').getAttribute('aria-label'),
+    };
+  });
+  assert.equal(liveHud.time, '00:01');
+  assert.match(liveHud.score, /^20 очков$/);
+  assert.equal(liveHud.record, '42', 'the personal record rises visually only when the live run beats it');
+  assert.match(liveHud.aria, /Время 00:01; очки 20; рекорд 42/);
+  await page.evaluate(() => { runnerGame = createRunnerState(); runnerMyBestScore = 0; updateRunnerHud(); });
   assert.equal(await page.locator('#runnerRestartBtn').count(), 1);
   assert.equal(await page.locator('#runnerRestartBtn').textContent(), '↻');
   const runnerFullscreen = await page.locator('#gameRunnerPanel .game-fullscreen-button').evaluate((button) => {
@@ -408,4 +460,4 @@ for (const width of [1280, 390]) {
 
 assert.deepEqual(errors, []);
 await browser.close();
-console.log('PASS: v26 theme-aware profile accents, compact runner pills, complete quiet hearts, shared restart/fullscreen utilities, full theme coverage, and conventional TTT.');
+console.log('PASS: v27 continuous theme surfaces, label-free runner score/time-record pills, shared restart/fullscreen utilities, and conventional TTT.');

@@ -66,7 +66,7 @@ assert '.info-pixel-heart' in c and '#appView .view .muted' in c
 assert '#appView .runner-overlay-text' in c
 
 # v23: intentional per-account personalization, private partner notes and game fullscreen controls.
-for element_id in ('personalizeButton', 'personalizationModal', 'themeChoices', 'tabOrderControls', 'savePersonalizationButton', 'partnerProfileModal', 'partnerProfileView', 'editPartnerProfileButton', 'partnerProfileForm', 'partnerProfileFields', 'addPartnerFieldButton', 'runnerClock', 'runnerRecordBadge', 'runnerMyRecord', 'runnerPartnerRecord'):
+for element_id in ('personalizeButton', 'personalizationModal', 'themeChoices', 'tabOrderControls', 'savePersonalizationButton', 'partnerProfileModal', 'partnerProfileView', 'editPartnerProfileButton', 'partnerProfileForm', 'partnerProfileFields', 'addPartnerFieldButton', 'runnerClock', 'runnerRecordBadge', 'runnerScore', 'runnerRecord'):
     assert f'id="{element_id}"' in h, element_id
 assert 'id="partnerBadge" class="partner-badge" type="button"' in h
 assert 'data-info-key="partnerProfile"' in h
@@ -98,7 +98,7 @@ assert 'id="partnerProfileView"' in profile_modal and 'id="editPartnerProfileBut
 assert 'id="partnerProfileForm" class="partner-profile-form hidden"' in profile_modal
 partner_shortcut = re.search(r'<div class="partner-shortcut">.*?</div>', h, re.S).group(0)
 assert 'data-info-key' not in partner_shortcut
-assert 'runnerLives' not in h and 'runnerScore' not in h and 'runnerLives' not in a and 'runnerScore' not in a
+assert 'runnerLives' not in h and 'runnerLives' not in a
 assert 'formatRunnerTime' in a and 'runnerClock' in a and 'runnerRecordBadge' in h
 runner_controls = re.search(r'<div class="runner-utility-buttons">.*?</div>', h, re.S).group(0)
 assert runner_controls.index('runnerRestartBtn') < runner_controls.index('runner-fullscreen-button')
@@ -125,7 +125,7 @@ assert 'Твои очки' in scoreboard.group(0) and 'Очки соперник
 assert '#gameTictactoePanel .ttt-mode-switch' in c and 'flex-wrap: nowrap' in c
 assert '#gameTictactoePanel .ttt-scoreboard' in c
 
-# v26: theme-aware memory profile, separate runner pills, complete hearts and shared restart icons.
+# v27: theme-aware memory profile, fully continuous palette, compact label-free runner pills and shared restart icons.
 assert 'partner-profile-memory-grid' in a and 'filledFields' in a
 assert 'partner-profile-info-grid' not in a and 'partner-profile-info-row' not in a
 assert 'PARTNER_PROFILE_ACCENTS' in a and 'normalizePartnerProfileAccent' in a
@@ -135,11 +135,19 @@ assert 'name="accent"' in a and 'accent-theme' in c
 assert 'partner-profile-cover' in c and 'partner-profile-memory-card' in c
 assert '.partner-profile-count { display: none !important;' in c
 assert 'то, что хочется бережно помнить' in a and 'noteWord' not in a
-assert 'runnerMyRecord' in h and 'runnerPartnerRecord' in h
-assert 'runner-record-slot' in h and 'runner-record-caption' in h
-assert "$('#runnerMyRecord')" in a and "$('#runnerPartnerRecord')" in a
-assert '#gameRunnerPanel .runner-time-score,' in c and 'border-radius: 999px' in c
-assert 'flex-wrap: nowrap;' in c and 'Two separate, single-line pills' in c
+runner_hud = re.search(r'<div class="runner-scoreline".*?</div>\s*\n\s*\n\s*<div id="runnerStage"', h, re.S).group(0)
+assert 'id="runnerScore"' in runner_hud and 'id="runnerClock"' in runner_hud and 'id="runnerRecord"' in runner_hud
+assert 'runnerMyRecord' not in runner_hud and 'runnerPartnerRecord' not in runner_hud
+assert 'мой' not in runner_hud and 'партнёра' not in runner_hud
+assert 'runner-score-pill' in runner_hud and 'runner-time-record-pill' in runner_hud
+assert "$('#runnerScore')" in a and "$('#runnerRecord')" in a and 'runnerMyBestScore' in a
+assert 'runnerData?.partner' not in a
+assert '#gameRunnerPanel .runner-score-pill,' in c and 'border-radius: 999px' in c
+assert 'flex-wrap: nowrap;' in c and 'two-pill runner HUD' in c
+assert '--theme-card:' in c and '--theme-inset-filled:' in c and '--theme-summary-filled:' in c
+assert 'Theme surfaces deliberately mix only the chosen theme colours' in c
+assert 'html[data-theme] details > summary' in c and 'html[data-theme] :is(input, textarea, select)' in c
+assert 'v27 supplemental legacy inset coverage' in c and '#infoModal .info-modal-body p' in c
 assert 'game-bottom-utilities' in h and 'game-bottom-fullscreen' in h
 assert h.count('class="game-restart-button') >= 3
 assert '↻ Сбросить историю' not in h and 'Новая партия ↻' not in h
@@ -165,13 +173,17 @@ readme = (p / 'README-VERCEL.md').read_text()
 publish = (p / 'PUBLISH-ON-VERCEL.md').read_text()
 assert 'Не удаляйте, не заменяйте' in readme and 'С прежней `DATABASE_URL`' in publish
 assert 'Не создавайте новый проект' in readme and 'Не создавайте новый Vercel-проект' in publish
-assert (p / 'RELEASE-v26.md').is_file()
+assert (p / 'RELEASE-v27.md').is_file()
 update_guide = (p / 'UPDATE-EXISTING-VERCEL.md').read_text()
 assert 'Не создавайте новый Vercel-проект' in update_guide and 'Не удаляйте' in update_guide
 assert 'npx vercel@latest link' in update_guide and 'Link to existing project? → Yes' in update_guide
 assert 'Вариант B — обновление с iPad' in update_guide and 'Не открывайте `vercel.com/drop`' in update_guide
-assert (p / 'GITHUB-PHONE-SETUP.md').is_file() and (p / 'github-phone-unpack-v26.yml').is_file()
-assert 'quiet-mailbox-vercel-v26.zip' in (p / 'GITHUB-PHONE-SETUP.md').read_text()
+assert (p / 'GITHUB-PHONE-SETUP.md').is_file() and (p / 'github-phone-unpack-update.yml').is_file()
+phone_guide = (p / 'GITHUB-PHONE-SETUP.md').read_text()
+phone_workflow = (p / 'github-phone-unpack-update.yml').read_text()
+assert 'quiet-mailbox-vercel-v27.zip' in phone_guide and '.github/workflows/unpack-update.yml' in phone_guide
+assert 'workflow_dispatch:' in phone_workflow and 'inputs:' in phone_workflow and 'unzip -o -q' in phone_workflow
+assert 'contents: write' in phone_workflow and 'test -f "$ARCHIVE"' in phone_workflow
 
 # Four symmetric header emojis: two before and two after the anniversary date.
 anniversary = re.search(r'<button id="anniversaryButton".*?</button>', h, re.S).group(0)
@@ -183,4 +195,4 @@ for path in p.rglob('*'):
     if path.is_file() and 'node_modules' not in path.parts and path.suffix in ['.js', '.json', '.html']:
         assert not re.search(r'openai|anthropic|gemini|/api/ai\b|ai-provider|ai-prompts', path.read_text(), re.I), path
 
-print('PASS: v26 wiring — compact theme-aware profile, aligned game pills/icons, complete quiet hearts, full theme coverage, retained Vercel data model, and conventional Tic-Tac-Toe.')
+print('PASS: v27 wiring — continuous theme surfaces, compact runner score/time-record pills, retained Vercel data model, and conventional Tic-Tac-Toe.')

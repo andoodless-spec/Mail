@@ -2644,6 +2644,7 @@ function createRunnerState() {
 }
 
 let runnerGame = createRunnerState();
+let runnerMyBestScore = 0;
 
 function runnerNow() {
   return typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : Date.now();
@@ -2662,22 +2663,25 @@ function formatRunnerTime(elapsedMs) {
 
 function updateRunnerHud() {
   const clockEl = $('#runnerClock');
+  const scoreEl = $('#runnerScore');
+  const recordEl = $('#runnerRecord');
+  const badge = $('#runnerRecordBadge');
   runnerGame.score = Math.floor(runnerGame.elapsedMs / 88) + runnerGame.bonusScore;
-  if (clockEl) clockEl.textContent = `${formatRunnerTime(runnerGame.elapsedMs)} · ${runnerGame.score} очков`;
+  const visibleRecord = Math.max(runnerMyBestScore, runnerGame.score);
+  if (clockEl) clockEl.textContent = formatRunnerTime(runnerGame.elapsedMs);
+  if (scoreEl) scoreEl.textContent = `${runnerGame.score} очков`;
+  if (recordEl) recordEl.textContent = String(visibleRecord);
+  badge?.setAttribute('aria-label', `Время ${formatRunnerTime(runnerGame.elapsedMs)}; очки ${runnerGame.score}; рекорд ${visibleRecord}`);
 }
 
 function renderRunnerRecords(runnerData = {}) {
+  const recordEl = $('#runnerRecord');
   const badge = $('#runnerRecordBadge');
-  const mineEl = $('#runnerMyRecord');
-  const partnerEl = $('#runnerPartnerRecord');
-  if (!badge || !mineEl || !partnerEl) return;
-  const mine = runnerData?.mine;
-  const partner = runnerData?.partner;
-  const mineScore = Number(mine?.best_score || 0);
-  const partnerScore = Number(partner?.best_score || 0);
-  mineEl.textContent = String(mineScore);
-  partnerEl.textContent = String(partnerScore);
-  badge.setAttribute('aria-label', `Рекорд: мой ${mineScore}; партнёра ${partnerScore}`);
+  const mineScore = Number(runnerData?.mine?.best_score || 0);
+  runnerMyBestScore = mineScore;
+  const visibleRecord = Math.max(mineScore, runnerGame.score || 0);
+  if (recordEl) recordEl.textContent = String(visibleRecord);
+  badge?.setAttribute('aria-label', `Время ${formatRunnerTime(runnerGame.elapsedMs)}; очки ${runnerGame.score || 0}; рекорд ${visibleRecord}`);
 }
 
 function runnerJump() {
