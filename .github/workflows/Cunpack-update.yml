@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'quiet-mailbox-vercel-v27.zip'
+      - '.github/workflows/Cunpack-update.yml'
   workflow_dispatch:
 
 permissions:
