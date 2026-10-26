@@ -2660,7 +2660,6 @@ function updateRunnerHud() {
   const mineEl = $('#runnerMyRecord');
   const partnerEl = $('#runnerPartnerRecord');
   const badge = $('#runnerRecordBadge');
-  // The left pill is deliberately a running number: no clock and no visible wording.
   runnerGame.score = Math.floor(runnerGame.elapsedMs / 88) + runnerGame.bonusScore;
   if (liveEl) liveEl.textContent = String(runnerGame.score);
   if (mineEl) mineEl.textContent = String(runnerMyBestScore);
