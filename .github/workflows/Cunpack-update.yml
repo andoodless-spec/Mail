@@ -31,4 +31,4 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Обновить Тихий ящик до v28"
             git push
-          fi
+          f
