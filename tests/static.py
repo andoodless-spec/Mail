@@ -18,5 +18,5 @@ for name in ('app.js','redesign.js','backup.js','settings.js','style.css','refer
  assert (r/name).is_file(), name
 for path in re.findall(r'(?:src|href)="(/[^"?]+)',html):
  assert (r/path[1:]).exists(),path
-assert json.loads((r/'package.json').read_text())['version']=='2.3.0'
+assert json.loads((r/'package.json').read_text())['version']=='2.4.1'
 print('PASS: unique IDs, local asset references,API routing,five book tabs,3 complete palettes,no mailbox search.')

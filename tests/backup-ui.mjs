@@ -36,18 +36,24 @@ try {
   assert.deepEqual(await draftOrder('main'), ['our', 'mailbox', 'dates', 'games']);
   assert.deepEqual(await tabOrder(), ['our', 'mailbox', 'dates', 'games']);
 
-  // --- Перетаскивание мышью: первая вкладка уезжает ниже второй ---
-  const grip = page.locator('[data-order-list="main"] [data-order-item]').first().locator('[data-order-grip]');
-  const second = page.locator('[data-order-list="main"] [data-order-item]').nth(1);
+  // --- «Наш уголок» закреплён первым: его нельзя ни перетащить, ни сдвинуть ---
+  const pinnedRow = page.locator('[data-order-list="main"] [data-order-item]').first();
+  assert.equal(await pinnedRow.getAttribute('data-order-pinned'), '1', 'уголок помечен закреплённым');
+  assert.equal(await pinnedRow.locator('[data-order-grip]').isDisabled(), true, 'ручка закреплённой вкладки выключена');
+  assert.equal(await pinnedRow.locator('[data-order-move][data-order-direction="1"]').isDisabled(), true, 'стрелка вниз выключена');
+
+  // --- Перетаскивание мышью: «Ящик» уезжает ниже «Свиданий» ---
+  const grip = page.locator('[data-order-list="main"] [data-order-item]').nth(1).locator('[data-order-grip]');
+  const third = page.locator('[data-order-list="main"] [data-order-item]').nth(2);
   const gripBox = await grip.boundingBox();
-  const secondBox = await second.boundingBox();
+  const thirdBox = await third.boundingBox();
   await page.mouse.move(gripBox.x + gripBox.width / 2, gripBox.y + gripBox.height / 2);
   await page.mouse.down();
   for (let step = 1; step <= 6; step += 1) {
-    await page.mouse.move(gripBox.x + gripBox.width / 2, gripBox.y + ((secondBox.y + secondBox.height - 6 - gripBox.y) * step) / 6);
+    await page.mouse.move(gripBox.x + gripBox.width / 2, gripBox.y + ((thirdBox.y + thirdBox.height - 6 - gripBox.y) * step) / 6);
   }
   await page.mouse.up();
-  assert.deepEqual(await draftOrder('main'), ['mailbox', 'our', 'dates', 'games'], 'мышью порядок меняется');
+  assert.deepEqual(await draftOrder('main'), ['our', 'dates', 'mailbox', 'games'], 'мышью порядок меняется, уголок остаётся первым');
 
   // --- Клавиатура: ручка двигает строку стрелкой ---
   await page.locator('[data-order-list="games"] [data-order-item]').first().locator('[data-order-grip]').focus();
@@ -75,13 +81,13 @@ try {
   await page.locator('[data-settings-tab=appearance]').click();
   await page.locator('#settingsPanelAppearance').waitFor({ state: 'visible' });
   await page.locator('#savePersonalizationButton').click();
-  await page.waitForFunction(() => personalizationDraft && personalizationDraft.orders.main[0] === 'mailbox');
+  await page.waitForFunction(() => personalizationDraft && personalizationDraft.orders.main[0] === 'our' && personalizationDraft.orders.main[1] === 'dates');
   await page.locator('#settingsModal .modal-close').click();
   await page.locator('#settingsModal').waitFor({ state: 'hidden' });
-  assert.deepEqual(await tabOrder(), ['mailbox', 'our', 'dates', 'games'], 'порядок применён к навигации');
+  assert.deepEqual(await tabOrder(), ['our', 'dates', 'mailbox', 'games'], 'порядок применён к навигации');
   await page.reload();
   await page.locator('#appView:not(.hidden)').waitFor();
-  assert.deepEqual(await tabOrder(), ['mailbox', 'our', 'dates', 'games'], 'порядок сохранился после перезагрузки');
+  assert.deepEqual(await tabOrder(), ['our', 'dates', 'mailbox', 'games'], 'порядок сохранился после перезагрузки');
   assert.deepEqual(await page.locator('.game-subtab').evaluateAll((nodes) => nodes.map((node) => node.dataset.gameSubtab)), ['runner', 'truths', 'tictactoe']);
 
   // Партнёр видит свой, отдельный порядок.

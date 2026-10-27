@@ -58,6 +58,12 @@ function normalizePartnerProfileAccent(value) {
   return Object.prototype.hasOwnProperty.call(PARTNER_PROFILE_ACCENTS, accent) ? accent : 'theme';
 }
 
+const PINNED_FIRST = { main: 'our' };
+// «Наш уголок» всегда стоит над «Ящиком», остальные вкладки двигаются свободно.
+function pinFirst(list, key) {
+  return [key, ...list.filter((item) => item !== key)];
+}
+
 function normalizeTabOrder(value, fallback) {
   const supplied = Array.isArray(value) ? value.map((item) => String(item)) : [];
   const next = [];
@@ -72,14 +78,14 @@ function normalizeClientPreferences(value = {}) {
   const homeTitles = {};
   for (const key of HOME_BLOCKS) if (typeof raw.homeTitles?.[key] === 'string' && raw.homeTitles[key].trim()) homeTitles[key] = raw.homeTitles[key].trim().slice(0, 60);
   return {
-    appearanceVersion: 33,
+    appearanceVersion: 34,
     theme,
     mode: ['light', 'dark', 'system'].includes(raw.mode) ? raw.mode : 'light',
     homeOrder: normalizeTabOrder(raw.homeOrder, HOME_BLOCKS),
     homeHidden: [...new Set((Array.isArray(raw.homeHidden) ? raw.homeHidden : []).filter(key => HOME_BLOCKS.includes(key)))],
     homeTitles,
     orders: {
-      main: normalizeTabOrder(raw.orders?.main, TAB_ORDER_DEFAULTS.main),
+      main: pinFirst(normalizeTabOrder(raw.orders?.main, TAB_ORDER_DEFAULTS.main), PINNED_FIRST.main),
       mailbox: normalizeTabOrder(raw.orders?.mailbox, TAB_ORDER_DEFAULTS.mailbox),
       games: normalizeTabOrder(raw.orders?.games, TAB_ORDER_DEFAULTS.games),
       dates: normalizeTabOrder(raw.orders?.dates, TAB_ORDER_DEFAULTS.dates),
@@ -1105,6 +1111,8 @@ function attachOrderDrag(list, group) {
   let startY = 0;
   let moved = false;
   const items = () => [...list.querySelectorAll('[data-order-item]')];
+  // закреплённые вкладки (например «Наш уголок») остаются на месте
+  const isPinned = (item) => item?.dataset?.orderPinned === '1';
   function finish() {
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', finish);
@@ -1118,7 +1126,7 @@ function attachOrderDrag(list, group) {
     renderPersonalizationModal();
   }
   function onMove(event) {
-    if (!dragging) return;
+    if (!dragging || dragging.dataset.orderPinned) return;
     if (Math.abs(event.clientY - startY) > 4) moved = true;
     if (!moved) return;
     event.preventDefault();
@@ -1133,6 +1141,7 @@ function attachOrderDrag(list, group) {
   list.querySelectorAll('[data-order-grip]').forEach((grip) => {
     grip.addEventListener('pointerdown', (event) => {
       if (event.button && event.button !== 0) return;
+      if (isPinned(grip.closest('[data-order-item]'))) return;
       dragging = grip.closest('[data-order-item]');
       moved = false;
       startY = event.clientY;
@@ -1171,12 +1180,16 @@ function renderPersonalizationModal() {
   tabOrderControls.innerHTML = Object.entries(TAB_ORDER_DEFAULTS).map(([group]) => `
     <section class="tab-order-group" data-order-group="${group}">
       <h5>${TAB_ORDER_TITLES[group]}</h5>
-      <div class="tab-order-list" data-order-list="${group}">${personalizationDraft.orders[group].map((key, index) => `
-        <div class="tab-order-item" data-order-item data-order-key="${key}">
-          <button type="button" class="tab-order-grip" data-order-grip aria-label="Перетащить: ${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}" title="Перетащить мышью или пальцем">⠿</button>
-          <span class="tab-order-label">${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}</span>
-          <span class="tab-order-moves"><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="-1" aria-label="Переместить выше: ${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="1" aria-label="Переместить ниже: ${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}" ${index === personalizationDraft.orders[group].length - 1 ? 'disabled' : ''}>↓</button></span>
-        </div>`).join('')}</div>
+      <div class="tab-order-list" data-order-list="${group}">${personalizationDraft.orders[group].map((key, index) => {
+        const label = TAB_ORDER_LABELS[group][key] || key;
+        const pinned = PINNED_FIRST[group] === key;
+        return `
+        <div class="tab-order-item${pinned ? ' is-pinned' : ''}" data-order-item data-order-key="${key}"${pinned ? ' data-order-pinned="1"' : ''}>
+          <button type="button" class="tab-order-grip" data-order-grip aria-label="${pinned ? `Закреплено первым: ${escapeHtml(label)}` : `Перетащить: ${escapeHtml(label)}`}" title="${pinned ? '«Наш уголок» всегда первый — перетаскивание не нужно' : 'Перетащить мышью или пальцем'}" ${pinned ? 'disabled aria-disabled="true"' : ''}>⠿</button>
+          <span class="tab-order-label">${escapeHtml(label)}${pinned ? ' <em class="tab-order-pin">всегда первым</em>' : ''}</span>
+          <span class="tab-order-moves"><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="-1" aria-label="Переместить выше: ${escapeHtml(label)}" ${pinned || index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="1" aria-label="Переместить ниже: ${escapeHtml(label)}" ${pinned || index === personalizationDraft.orders[group].length - 1 ? 'disabled' : ''}>↓</button></span>
+        </div>`;
+      }).join('')}</div>
     </section>`).join('');
   tabOrderControls.querySelectorAll('[data-order-list]').forEach((list) => attachOrderDrag(list, list.dataset.orderList));
 
@@ -1190,6 +1203,7 @@ function renderPersonalizationModal() {
     const destination = index + Number(button.dataset.orderDirection);
     const order = personalizationDraft.orders[group];
     if (!order || destination < 0 || destination >= order.length) return;
+    if (PINNED_FIRST[group] === order[index]) return;
     [order[index], order[destination]] = [order[destination], order[index]];
     renderPersonalizationModal();
   }));

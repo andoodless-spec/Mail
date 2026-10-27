@@ -1,7 +1,7 @@
 {
   "name": "quiet-mailbox",
-  "version": "2.3.0",
-  "appearanceVersion": 33,
+  "version": "2.4.1",
+  "appearanceVersion": 34,
   "date": "2026-10-28",
   "originalBackendFilesUnchanged": {
     "endpoints/outcome.js": "05dfde9b6d98c3e203487c2cb215977b1098153947f5fd833de4909ad166c288",

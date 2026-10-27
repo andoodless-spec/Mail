@@ -35,8 +35,9 @@ const savedPrefs = await call('/api/preferences', 'POST', {
 });
 assert.equal(savedPrefs.preferences.theme, 'blue');
 // A custom tab order is personal and now survives; a key left out of the list
-// is appended in its default place instead of disappearing.
-assert.equal(JSON.stringify(savedPrefs.preferences.orders.main), JSON.stringify(['games', 'mailbox', 'dates', 'our']));
+// is appended in its default place instead of disappearing. «Наш уголок»
+// остаётся первым даже если клиент прислал его последним.
+assert.equal(JSON.stringify(savedPrefs.preferences.orders.main), JSON.stringify(['our', 'games', 'mailbox', 'dates']));
 assert.equal(JSON.stringify(savedPrefs.preferences.orders.mailbox), JSON.stringify(['capsule', 'mailbox', 'conversation', 'homework', 'agreements']));
 assert.equal((await call('/api/state')).preferences.theme, 'blue');
 as(2);

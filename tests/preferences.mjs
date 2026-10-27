@@ -22,7 +22,9 @@ for(const raw of [{orders:{main:['games','our'],mailbox:['capsule','mailbox','ca
  assert.equal(new Set(server.orders.games).size,server.orders.games.length);
 }
 const customOrder=normalizePreferences({orders:{main:['games','our'],mailbox:['capsule','mailbox']}});
-assert.deepEqual(customOrder.orders.main,['games','our','mailbox','dates']);
+// «Наш уголок» закреплён первым, остальные вкладки идут в своём порядке.
+assert.deepEqual(customOrder.orders.main,['our','games','mailbox','dates']);
+assert.equal(normalizePreferences({orders:{main:['mailbox','dates','games','our']}}).orders.main[0],'our','уголок всегда над ящиком');
 assert.deepEqual(customOrder.orders.mailbox,['capsule','mailbox','conversation','homework','agreements']);
 assert.deepEqual(normalizePreferences({orders:{main:['nope']}}).orders.main,TAB_ORDER_DEFAULTS.main,'битый порядок откатывается к умолчанию');
 let prefs=mergePreferences({theme:'purple',mode:'dark',homeOrder:['intimate','agreements','wishes','decisions'],homeTitles:{wishes:'Мечты'}},{homeHidden:['decisions']});
