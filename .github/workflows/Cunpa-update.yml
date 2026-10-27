@@ -1,12 +1,12 @@
-name: Распаковать Тихий ящик и проверить файлы
+name: Тихий ящик 2.3.0 (оформление v33) — распаковка архива
 
-# Запускается, когда в корень основной ветки загрузили архив quiet-mailbox*.zip.
-# Можно запустить и вручную: Actions → «Распаковать Тихий ящик и проверить файлы» → Run workflow.
+# Распаковщик под конкретную поставку: quiet-mailbox-v33.zip, версия 2.3.0, appearanceVersion 33.
+# Запуск: положить архив в корень основной ветки (или Actions → Run workflow).
 
 on:
   push:
     paths:
-      - 'quiet-mailbox*.zip'
+      - 'quiet-mailbox-v33.zip'
       - '.github/workflows/unzip-quiet-mailbox.yml'
   workflow_dispatch:
 
@@ -14,124 +14,135 @@ permissions:
   contents: write
 
 concurrency:
-  group: unzip-quiet-mailbox
+  group: unzip-quiet-mailbox-v33
   cancel-in-progress: false
+
+env:
+  # ▼▼▼ конкретная версия: архив, его SHA-256 и ожидаемые значения ▼▼▼
+  ARCHIVE: quiet-mailbox-v33.zip
+  ARCHIVE_SHA256: d37291e0fa8b73db9e5b72f8642097be24817297a57015818d1c53c51afad02b
+  ARCHIVE_BYTES: '254576'
+  ZIP_ROOT: quiet-mailbox
+  EXPECT_VERSION: 2.3.0
+  EXPECT_APPEARANCE: '33'
+  EXPECT_FILES: '111'
+  # ▲▲▲ если пересобрали архив — обновите эти пять значений ▲▲▲
 
 jobs:
   unzip:
     runs-on: ubuntu-latest
     steps:
-      - name: Получить репозиторий
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Найти архив в корне
-        id: find
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Проверить, что загружен именно нужный архив
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          files=(quiet-mailbox*.zip)
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "::error::В корне репозитория нет архива quiet-mailbox*.zip. Загрузите его в корень основной ветки."
+          if [ ! -f "$ARCHIVE" ]; then
+            echo "::error::Нет файла $ARCHIVE в корне ветки $GITHUB_REF_NAME. Нужен именно он, другие архивы этот workflow не обрабатывает."
             exit 1
           fi
-          if [ "${#files[@]}" -gt 1 ]; then
-            echo "::error::Найдено несколько архивов: ${files[*]}. Оставьте только один, иначе непонятно, какой распаковывать."
+          bytes="$(stat -c%s "$ARCHIVE")"
+          hash="$(sha256sum "$ARCHIVE" | cut -d' ' -f1)"
+          echo "Файл: $ARCHIVE"
+          echo "Размер: $bytes байт (ожидается $ARCHIVE_BYTES)"
+          echo "SHA-256: $hash"
+          if [ "$hash" != "$ARCHIVE_SHA256" ]; then
+            echo "::error::Контрольная сумма не совпадает с версией 2.3.0. Это другой файл или архив докачался не полностью. Файлы в репозитории не изменены. Если архив пересобран намеренно — обновите ARCHIVE_SHA256 и ARCHIVE_BYTES в workflow."
             exit 1
           fi
-          echo "archive=${files[0]}" >> "$GITHUB_OUTPUT"
-          echo "Архив: ${files[0]} ($(du -h "${files[0]}" | cut -f1))"
+          echo "Это тот самый архив 2.3.0."
 
-      - name: Распаковать во временную папку
+      - name: Распаковать
         id: unpack
         shell: bash
         run: |
           set -euo pipefail
           target="$RUNNER_TEMP/unpacked"
-          rm -rf "$target"
-          mkdir -p "$target"
-          unzip -q "${{ steps.find.outputs.archive }}" -d "$target" || {
-            echo "::error::Архив повреждён или это не ZIP. Файлы в репозитории не изменены."
-            exit 1
-          }
-          # Архив собран с вложенной папкой quiet-mailbox/, иногда её может не быть.
-          root="$target"
-          if [ ! -f "$target/package.json" ]; then
-            only="$(find "$target" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
-            if [ -n "$only" ] && [ -f "$only/package.json" ]; then root="$only"; fi
-          fi
-          if [ ! -f "$root/package.json" ] || [ ! -f "$root/index.html" ]; then
-            echo "::error::Внутри архива нет package.json или index.html. Похоже, это не архив «Тихого ящика»."
-            exit 1
-          fi
+          rm -rf "$target"; mkdir -p "$target"
+          unzip -q "$ARCHIVE" -d "$target" || { echo "::error::Архив повреждён. Файлы в репозитории не изменены."; exit 1; }
+          root="$target/$ZIP_ROOT"
+          [ -d "$root" ] || { echo "::error::В архиве нет папки $ZIP_ROOT/ — это не поставка «Тихого ящика»."; exit 1; }
           echo "root=$root" >> "$GITHUB_OUTPUT"
-          echo "Версия в архиве: $(node -p "require('$root/package.json').version")"
           echo "Файлов в архиве: $(find "$root" -type f | wc -l)"
 
-      - name: Проверить, что архив не содержит секретов и мусора
-        shell: bash
-        run: |
-          set -euo pipefail
-          root="${{ steps.unpack.outputs.root }}"
-          bad="$(find "$root" \( -name '.env' -o -name '.env.*' -o -name 'node_modules' -o -name 'dist' -o -name 'test-artifacts' -o -name '.git' -o -name '*.pem' \) -print -quit)"
-          if [ -n "$bad" ]; then
-            echo "::error::В архиве есть то, чего быть не должно: $bad. Распаковка остановлена, файлы не изменены."
-            exit 1
-          fi
-          echo "Секретов и артефактов сборки в архиве нет."
-
-      - name: Проверить код до копирования
+      - name: Сверить версию и состав с ожидаемым
         shell: bash
         run: |
           set -euo pipefail
           root="${{ steps.unpack.outputs.root }}"
           cd "$root"
-          for file in app.js redesign.js backup.js settings.js lib/preferences.js lib/http.js lib/db.js api/'[...path].js'; do
-            node --check "$file" || { echo "::error::Синтаксическая ошибка в $file"; exit 1; }
-          done
-          for file in index.html style.css redesign.css manifest.json; do
-            [ -f "$file" ] || { echo "::error::Не хватает обязательного файла $file"; exit 1; }
-          done
-          # Эти три проверки не требуют npm install: только Node.
-          node tests/preferences.mjs || { echo "::error::Проверка настроек не прошла"; exit 1; }
-          node tests/fallback.mjs   || { echo "::error::Проверка локального режима не прошла"; exit 1; }
-          node tests/backup.mjs     || { echo "::error::Проверка резервных копий не прошла"; exit 1; }
 
-      - name: Скопировать файлы в корень репозитория
+          files="$(find . -type f | wc -l)"
+          [ "$files" = "$EXPECT_FILES" ] || { echo "::error::В архиве $files файлов вместо $EXPECT_FILES. Состав не тот, что в 2.3.0."; exit 1; }
+
+          version="$(node -p "require('./package.json').version")"
+          [ "$version" = "$EXPECT_VERSION" ] || { echo "::error::package.json: версия $version вместо $EXPECT_VERSION"; exit 1; }
+
+          rel="$(node -p "const r=require('./RELEASE.json'); r.version+' / '+r.appearanceVersion")"
+          [ "$rel" = "$EXPECT_VERSION / $EXPECT_APPEARANCE" ] || { echo "::error::RELEASE.json: $rel вместо $EXPECT_VERSION / $EXPECT_APPEARANCE"; exit 1; }
+
+          # то, что появилось именно в этой версии
+          for f in settings.js backup.js RELEASE-v33.md assets/ui/profile.svg assets/ui/palette.svg; do
+            [ -f "$f" ] || { echo "::error::Нет файла $f — это архив не 2.3.0 (v33)."; exit 1; }
+          done
+          grep -q 'settings.js?v=33' index.html || { echo "::error::index.html не подключает settings.js?v=33"; exit 1; }
+          for tab in settingsPanelAppearance settingsPanelLayout settingsPanelAlerts settingsPanelAccount; do
+            grep -q "$tab" index.html || { echo "::error::В index.html нет вкладки $tab"; exit 1; }
+          done
+          grep -rq 'appearanceVersion: 33\|appearanceVersion.*33' lib/preferences.js || { echo "::error::lib/preferences.js без appearanceVersion 33"; exit 1; }
+          echo "Версия 2.3.0 / оформление v33 подтверждена по файлам."
+
+      - name: Не пускать в репозиторий секреты и мусор
         shell: bash
         run: |
           set -euo pipefail
           root="${{ steps.unpack.outputs.root }}"
-          # Копируем поверх, ничего не удаляя: посторонние файлы в репозитории
-          # остаются на месте. Архив и .github не трогаем.
-          cp -R "$root"/. .
-          echo "Скопировано файлов: $(find "$root" -type f | wc -l)"
+          bad="$(find "$root" \( -name '.env' -o -name '.env.*' -o -name 'node_modules' -o -name 'dist' -o -name 'test-artifacts' -o -name '.git' -o -name '*.pem' \) -print -quit)"
+          [ -z "$bad" ] || { echo "::error::В архиве лишнее: $bad. Распаковка остановлена."; exit 1; }
+          echo "Секретов и артефактов сборки нет."
 
-      - name: Сверить, что каждый файл лёг байт в байт
+      - name: Прогнать проверки этой версии (без npm install)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${{ steps.unpack.outputs.root }}"
+          for f in app.js redesign.js backup.js settings.js lib/preferences.js lib/http.js lib/db.js lib/games.js api/'[...path].js'; do
+            node --check "$f" || { echo "::error::Синтаксическая ошибка в $f"; exit 1; }
+          done
+          node tests/preferences.mjs || { echo "::error::Настройки (preferences) не прошли"; exit 1; }
+          node tests/fallback.mjs    || { echo "::error::Локальный режим (fallback) не прошёл"; exit 1; }
+          node tests/backup.mjs      || { echo "::error::Резервные копии (backup) не прошли"; exit 1; }
+
+      - name: Скопировать в корень репозитория, не удаляя лишнего
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R "${{ steps.unpack.outputs.root }}"/. .
+          echo "Скопировано: $(find "${{ steps.unpack.outputs.root }}" -type f | wc -l) файлов"
+
+      - name: Сверить в ветке байт в байт
         shell: bash
         run: |
           set -euo pipefail
           root="${{ steps.unpack.outputs.root }}"
-          mismatched=0
-          while IFS= read -r -d '' file; do
-            rel="${file#"$root"/}"
-            if [ ! -f "$rel" ]; then
-              echo "::error::Файл не скопировался: $rel"; mismatched=1; continue
-            fi
-            if ! cmp -s "$file" "$rel"; then
-              echo "::error::Содержимое отличается: $rel"; mismatched=1
-            fi
+          bad=0
+          while IFS= read -r -d '' f; do
+            rel="${f#"$root"/}"
+            if [ ! -f "$rel" ]; then echo "::error::Не скопирован: $rel"; bad=1; continue; fi
+            cmp -s "$f" "$rel" || { echo "::error::Отличается: $rel"; bad=1; }
           done < <(find "$root" -type f -print0)
-          if [ "$mismatched" -ne 0 ]; then
-            echo "::error::Проверка не прошла. Ничего не отправлено в ветку — исправьте архив и загрузите снова."
-            exit 1
-          fi
-          echo "Все файлы совпадают с архивом."
+          [ "$bad" -eq 0 ] || { echo "::error::Проверка не прошла, коммит не отправлен."; exit 1; }
+          echo "В ветке лежит точно содержимое архива."
 
-      - name: Отправить изменения в ту же ветку
+      - name: Закоммитить в основную ветку
         shell: bash
         run: |
           set -euo pipefail
@@ -139,14 +150,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
-            echo "Изменений нет: в репозитории уже эта версия. Коммит не нужен."
+            echo "В ветке уже ровно эта версия — коммит не нужен."
             exit 0
           fi
-          version="$(node -p "require('./package.json').version")"
-          git commit -m "Тихий ящик ${version}: распаковка архива"
+          git commit -m "Тихий ящик 2.3.0 (оформление v33)"
           git push origin "HEAD:${GITHUB_REF_NAME}" || {
-            echo "::error::Не удалось отправить коммит. Проверьте Settings → Actions → General → Workflow permissions → Read and write permissions. Защищённую ветку этот workflow не обходит."
+            echo "::error::Push отклонён. Settings → Actions → General → Workflow permissions → Read and write permissions. Защищённую ветку этот workflow не обходит."
             exit 1
           }
-          echo "ГОТОВО: все $(find . -maxdepth 1 -name '*.js' | wc -l) файлов на месте. Версия ${version} в ветке ${GITHUB_REF_NAME}."
-          echo "Коммит: $(git rev-parse --short HEAD)"
+          echo "ГОТОВО: 2.3.0 / v33 в ветке ${GITHUB_REF_NAME}, коммит $(git rev-parse --short HEAD)."
