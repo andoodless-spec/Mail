@@ -1,20 +1,21 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="pink" data-mode="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffedf5">
+  <meta name="theme-color" content="#e9dde1">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Тихий ящик">
   <title>Тихий ящик</title>
-  <link rel="icon" type="image/svg+xml" href="/icon.svg">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg?v=33">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=33">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=33">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/reference.css">
   <link rel="stylesheet" href="/extra.css">
+  <link rel="stylesheet" href="/redesign.css?v=33">
 </head>
 <body>
   <div class="grain"></div>
@@ -25,37 +26,8 @@
       <div id="authAlert" class="auth-alert hidden" role="alert"></div>
       <h1>Привет!</h1>
       <p class="lead">как тебя зовут, котик?</p>
-      <div class="cat-illustration" aria-hidden="true">
-        <svg viewBox="0 0 440 205" xmlns="http://www.w3.org/2000/svg">
-          <path class="cat-tail tail-pink" d="M95 155 C38 176 32 115 73 116" />
-          <path class="cat-tail tail-lilac" d="M333 158 C398 179 408 116 367 118" />
-          <g class="cat cat-pink">
-            <path class="cat-fur" d="M66 88 L79 33 L117 61 Q148 45 179 61 L216 33 L229 89 Q227 143 148 148 Q68 143 66 88Z" />
-            <path class="cat-ear" d="M82 51 L91 40 L110 63Z" />
-            <path class="cat-ear" d="M197 63 L215 40 L222 52Z" />
-            <ellipse class="cat-eye" cx="112" cy="91" rx="7" ry="10" />
-            <ellipse class="cat-eye" cx="183" cy="91" rx="7" ry="10" />
-            <path class="cat-face" d="M145 99 Q149 95 153 99 L149 104Z" />
-            <path class="cat-face" d="M149 104 Q145 113 137 109 M149 104 Q153 113 300 109" opacity="0" />
-            <path class="cat-face" d="M149 104 Q145 113 137 109 M149 104 Q153 113 161 109" />
-            <path class="cat-whisker" d="M133 103 L103 99 M133 109 L101 113 M165 103 L195 99 M165 109 L197 113" />
-          </g>
-          <g class="cat cat-lilac">
-            <path class="cat-fur" d="M213 96 L225 43 L260 67 Q291 50 323 67 L358 43 L371 96 Q369 150 291 155 Q213 150 213 96Z" />
-            <path class="cat-ear" d="M229 60 L237 49 L255 70Z" />
-            <path class="cat-ear" d="M341 70 L359 49 L367 60Z" />
-            <ellipse class="cat-eye" cx="259" cy="99" rx="7" ry="10" />
-            <ellipse class="cat-eye" cx="330" cy="99" rx="7" ry="10" />
-            <path class="cat-face" d="M291 107 Q295 103 299 107 L295 112Z" />
-            <path class="cat-face" d="M295 112 Q291 121 283 117 M295 112 Q299 121 307 117" />
-            <path class="cat-whisker" d="M279 111 L249 107 M279 117 L247 121 M311 111 L341 107 M311 117 L343 121" />
-          </g>
-          <path class="cat-heart" d="M218 22 C208 8 183 18 218 45 C253 18 228 8 218 22Z" />
-          <circle class="cat-sparkle" cx="48" cy="67" r="4" />
-          <circle class="cat-sparkle" cx="390" cy="72" r="4" />
-        </svg>
-      </div>
-      <div class="intro-note"><span>💌</span><span>Сладкое тоже важно сохранять.</span></div>
+      <div class="cat-illustration" aria-hidden="true"><img src="/assets/ui/together.svg" alt=""></div>
+      <div class="intro-note"><span><img class="pixel-icon" src="/assets/ui/letter.svg" alt="" aria-hidden="true"></span><span>Сладкое тоже важно сохранять.</span></div>
     </div>
     <div class="auth-card">
       <div class="auth-tabs">
@@ -103,19 +75,19 @@
   <section id="appView" class="app-shell hidden">
     <header class="topbar">
       <button id="anniversaryButton" class="anniversary-button" type="button" aria-haspopup="dialog" aria-controls="anniversaryModal" title="Открыть вашу праздничную дату">
-        <span class="anniversary-sparkle" aria-hidden="true">✨</span>
-        <span class="anniversary-heart" aria-hidden="true">💞</span>
+        <span class="anniversary-sparkle" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"></span>
+        <span class="anniversary-heart" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/heart.svg" alt="" aria-hidden="true"></span>
         <span class="anniversary-date-label">26.03.2025</span>
-        <span class="anniversary-sparkle anniversary-sparkle-right" aria-hidden="true">✨</span>
-        <span class="anniversary-ribbon" aria-hidden="true">🎀</span>
+        <span class="anniversary-sparkle anniversary-sparkle-right" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"></span>
+        <span class="anniversary-ribbon" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/heart.svg" alt="" aria-hidden="true"></span>
       </button>
       <div class="top-actions">
         <div class="top-menu">
           <button id="topMenuButton" class="top-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="topMenuDropdown" aria-label="Открыть меню" title="Меню">⋯</button>
           <div id="topMenuDropdown" class="top-menu-dropdown hidden" role="menu">
-            <button id="feedbackButton" class="top-menu-item" type="button" role="menuitem">💡 Идеи</button>
-            <button id="settingsButton" class="top-menu-item" type="button" role="menuitem">⚙️ Настройки</button>
-            <button id="logoutButton" class="top-menu-item top-menu-logout" type="button" role="menuitem">🚪 Выйти</button>
+            <button id="feedbackButton" class="top-menu-item" type="button" role="menuitem"><img class="pixel-icon" src="/assets/ui/bulb.svg" alt="" aria-hidden="true"> Идеи</button>
+            <button id="settingsButton" class="top-menu-item" type="button" role="menuitem"><img class="pixel-icon" src="/assets/ui/settings.svg" alt="" aria-hidden="true"> Настройки</button>
+            <button id="logoutButton" class="top-menu-item top-menu-logout" type="button" role="menuitem"><img class="pixel-icon" src="/assets/ui/door.svg" alt="" aria-hidden="true"> Выйти</button>
           </div>
         </div>
       </div>
@@ -137,63 +109,82 @@
 
     <div id="settingsModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="modal-card settings-modal-card">
-        <button class="modal-close" data-close-modal="settingsModal" aria-label="Закрыть">×</button>
-        <div class="card-kicker">ваш ящик</div>
-        <h3 id="settingsTitle">Настройки</h3>
-        <div class="settings-layout">
-          <article class="card settings-card profile-settings">
-            <div class="card-kicker">твой профиль</div>
-            <h3>Имя профиля</h3>
-            <p class="muted">Сейчас тебя зовут: <strong id="userName">—</strong></p>
-            <form id="profileNameForm" class="pin-form">
-              <input id="profileNameInput" name="name" maxlength="60" placeholder="Новое имя (например, Яночкин)" required>
-              <button class="button secondary" type="submit">Сохранить имя</button>
-            </form>
-          </article>
-          <article class="card settings-card pin-settings">
-            <div class="card-kicker">безопасность и вход</div>
-            <h3>Пароль (PIN)</h3>
-            <p id="pinStatus" class="muted">PIN нужен для входа.</p>
-            <form id="pinForm" class="pin-form">
-              <input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" placeholder="Новый пароль, 4–8 цифр" required>
-              <button class="button secondary" type="submit">Сохранить пароль</button>
-            </form>
-          </article>
-          <article class="card settings-card">
-            <div class="card-kicker">код пары</div>
-            <h3>Код приглашения</h3>
-            <p class="muted">Нужен только для подключения партнёра.</p>
-            <div class="invite-code"><span id="inviteCode">—</span><button id="copyCode" class="quiet-button" type="button">Скопировать</button></div>
-          </article>
-          <article class="card settings-card">
-            <div class="card-kicker">напоминания и браузер</div>
-            <h3>Мягкие подсказки</h3>
-            <label class="toggle-row"><span>Разрешить напоминания</span><input id="nudgeToggle" type="checkbox"><span class="toggle"></span></label>
-            <button id="notificationButton" class="button secondary" type="button">Разрешить уведомления</button>
-          </article>
-          <article class="card settings-card personalize-settings">
-            <div class="card-kicker">только для тебя</div>
-            <h3>Персонализация</h3>
-            <button id="personalizeButton" class="button secondary" type="button">Открыть персонализацию</button>
-          </article>
+        <div class="settings-drawer-head">
+          <div>
+            <div class="card-kicker">ваш ящик</div>
+            <h3 id="settingsTitle">Настройки</h3>
+          </div>
+          <button class="modal-close" data-close-modal="settingsModal" aria-label="Закрыть настройки">×</button>
         </div>
-      </div>
-    </div>
-
-    <div id="personalizationModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="personalizationTitle">
-      <div class="modal-card personalization-modal-card">
-        <button class="modal-close" data-close-modal="personalizationModal" aria-label="Закрыть">×</button>
-        <div class="card-kicker">только для этого входа</div>
-        <h3 id="personalizationTitle">Персонализация</h3>
-        <section class="personalization-section" aria-labelledby="themeChoiceTitle">
-          <h4 id="themeChoiceTitle">Тема</h4>
-          <div id="themeChoices" class="theme-choices" role="group" aria-label="Цветовая тема"></div>
-        </section>
-        <section class="personalization-section" aria-labelledby="tabOrderTitle">
-          <h4 id="tabOrderTitle">Порядок вкладок</h4>
-          <div id="tabOrderControls" class="tab-order-controls"></div>
-        </section>
-        <button id="savePersonalizationButton" class="button primary" type="button">Сохранить мой вид</button>
+        <div class="settings-tabs" role="tablist" aria-label="Разделы настроек">
+          <button class="settings-tab active" id="settingsTabAppearance" type="button" role="tab" aria-selected="true" aria-controls="settingsPanelAppearance" data-settings-tab="appearance" tabindex="0">Оформление</button>
+          <button class="settings-tab" id="settingsTabLayout" type="button" role="tab" aria-selected="false" aria-controls="settingsPanelLayout" data-settings-tab="layout" tabindex="-1">Расположение</button>
+          <button class="settings-tab" id="settingsTabAlerts" type="button" role="tab" aria-selected="false" aria-controls="settingsPanelAlerts" data-settings-tab="alerts" tabindex="-1">Напоминания</button>
+          <button class="settings-tab" id="settingsTabAccount" type="button" role="tab" aria-selected="false" aria-controls="settingsPanelAccount" data-settings-tab="account" tabindex="-1">Аккаунт и данные</button>
+        </div>
+        <div class="settings-panels">
+          <section class="settings-panel" id="settingsPanelAppearance" role="tabpanel" aria-labelledby="settingsTabAppearance" data-settings-panel="appearance">
+            <div class="settings-body">
+              <h4 class="settings-heading">Твоя палитра</h4>
+              <p class="muted">Три приглушённых оттенка, в которых спокойно.</p>
+              <div id="themeChoices" class="theme-choices" role="group" aria-label="Цветовая тема"></div>
+              <h4 class="settings-heading">Время на сайте</h4>
+              <p class="muted">Светлая, тёмная или как на устройстве.</p>
+              <div id="modeChoices" class="mode-choices" role="group" aria-label="Освещение"></div>
+              <button id="savePersonalizationButton" class="button primary settings-save" type="button">Сохранить мой вид</button>
+              <p class="footnote">Тема и режим сохраняются в твоём аккаунте и не меняют вид партнёра.</p>
+            </div>
+          </section>
+          <section class="settings-panel hidden" id="settingsPanelLayout" role="tabpanel" aria-labelledby="settingsTabLayout" data-settings-panel="layout">
+            <div class="settings-body">
+              <h4 class="settings-heading">Порядок вкладок</h4>
+              <p class="muted">Перетащи строку за ⠿ мышью или пальцем, а стрелками ↑↓ двигай с клавиатуры. Порядок меняется только у тебя.</p>
+              <div id="tabOrderControls" class="tab-order-controls"></div>
+              <p class="footnote">Блоки главного экрана настраиваются на самом уголке: «Настроить мой уголок». Скрытый блок не удаляет записи.</p>
+            </div>
+          </section>
+          <section class="settings-panel hidden" id="settingsPanelAlerts" role="tabpanel" aria-labelledby="settingsTabAlerts" data-settings-panel="alerts">
+            <div class="settings-body">
+              <h4 class="settings-heading">Мягкие подсказки</h4>
+              <p class="muted">Короткое напоминание, когда наступает день разговора.</p>
+              <label class="setting-check"><span>Разрешить напоминания<small>Только в этом браузере, без писем и звонков</small></span><input id="nudgeToggle" type="checkbox"></label>
+              <button id="notificationButton" class="button secondary" type="button">Разрешить уведомления</button>
+              <p class="footnote">Если браузер не поддерживает уведомления, напоминание останется внутри сайта.</p>
+            </div>
+          </section>
+          <section class="settings-panel hidden" id="settingsPanelAccount" role="tabpanel" aria-labelledby="settingsTabAccount" data-settings-panel="account">
+            <div class="settings-body">
+              <h4 class="settings-heading">Мой аккаунт</h4>
+              <div class="account-box">
+                <img class="pixel-icon" src="/assets/ui/profile.svg" alt="" aria-hidden="true">
+                <div><strong id="userName">—</strong><small id="accountSyncNote">—</small></div>
+              </div>
+              <h4 class="settings-heading">Имя профиля</h4>
+              <form id="profileNameForm" class="pin-form">
+                <input id="profileNameInput" name="name" maxlength="60" placeholder="Новое имя (например, Яночкин)" required>
+                <button class="button secondary" type="submit">Сохранить имя</button>
+              </form>
+              <h4 class="settings-heading">Пароль (PIN)</h4>
+              <p id="pinStatus" class="muted">PIN нужен для входа.</p>
+              <form id="pinForm" class="pin-form">
+                <input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" placeholder="Новый пароль, 4–8 цифр" required>
+                <button class="button secondary" type="submit">Сохранить пароль</button>
+              </form>
+              <h4 class="settings-heading">Код приглашения</h4>
+              <p class="muted">Нужен только для подключения партнёра.</p>
+              <div class="invite-code"><span id="inviteCode">—</span><button id="copyCode" class="quiet-button" type="button">Скопировать</button></div>
+              <h4 class="settings-heading">Резервная копия</h4>
+              <p class="muted">Скачай файл с записями или добавь их из ранее сохранённой копии.</p>
+              <div class="backup-actions">
+                <button id="exportBackupButton" class="button secondary" type="button">Скачать копию (JSON)</button>
+                <button id="importBackupButton" class="button secondary" type="button">Восстановить из файла</button>
+                <input id="importBackupInput" class="hidden" type="file" accept="application/json,.json" aria-label="Файл резервной копии">
+              </div>
+              <div id="importBackupPreview" class="backup-preview hidden" aria-live="polite"></div>
+              <p id="backupStatus" class="small-note" role="status"></p>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
 
@@ -219,11 +210,11 @@
     <div id="anniversaryModal" class="overlay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="anniversaryTitle">
       <div class="modal-card anniversary-modal-card">
         <button class="modal-close" data-close-modal="anniversaryModal" aria-label="Закрыть">×</button>
-        <div class="anniversary-confetti" aria-hidden="true">✦ 🎀 ✦ 🎉 ✦</div>
+        <div class="anniversary-confetti" aria-hidden="true">✦ <img class="pixel-icon" src="/assets/ui/heart.svg" alt="" aria-hidden="true"> ✦ <img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"> ✦</div>
         <div class="card-kicker">ваша дата</div>
         <h3 id="anniversaryTitle">26 марта — ваш день</h3>
         <p id="anniversaryLead" class="anniversary-lead">Вы вместе с 26.03.2025.</p>
-        <p id="anniversaryCallout" class="anniversary-callout hidden">Пора праздновать и планировать ✨</p>
+        <p id="anniversaryCallout" class="anniversary-callout hidden">Пора праздновать и планировать <img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"></p>
         <div class="anniversary-countdown">
           <strong id="anniversaryDays">—</strong>
           <span id="anniversaryCountdownLabel">до следующей годовщины</span>
@@ -231,7 +222,7 @@
         <p id="anniversaryPlanText" class="anniversary-plan-text">Выберите идею для вашего дня.</p>
         <form id="anniversaryIdeaForm" class="anniversary-idea-form">
           <textarea name="text" maxlength="500" rows="2" placeholder="Идея для 26 марта…" required></textarea>
-          <button class="button primary" type="submit">Сохранить идею ✨</button>
+          <button class="button primary" type="submit">Сохранить идею <img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"></button>
         </form>
         <div id="anniversaryIdeasList" class="anniversary-ideas-list"></div>
         <details id="anniversaryHiddenIdeasDetails" class="anniversary-hidden-ideas hidden">
@@ -255,32 +246,10 @@
         <div class="welcome-copy">
           <div class="welcome-copy-text">
             <p class="eyebrow">ваше пространство</p>
-            <h2>Что хочется оставить здесь?</h2>
-            <p class="muted">Сохраняйте мысли до разговора.</p>
+            <h2 id="pageHeading">Наш уголок<span>.</span></h2>
+            <p class="muted" id="pageLead">Маленькое место для вашей большой истории.</p>
           </div>
-          <div class="welcome-kitten" aria-hidden="true">
-            <svg viewBox="0 0 164 154" xmlns="http://www.w3.org/2000/svg" focusable="false">
-              <defs>
-                <linearGradient id="welcomeKittenFur" x1="0" y1="0" x2="1" y2="1">
-                  <stop stop-color="#ffc2df"/><stop offset="1" stop-color="#cbb6f4"/>
-                </linearGradient>
-              </defs>
-              <ellipse cx="83" cy="141" rx="54" ry="7" fill="#d8bce9" opacity=".25"/>
-              <path d="M117 126 C155 141 158 103 140 103 C128 103 130 115 138 115" fill="none" stroke="#c2a4e8" stroke-width="11" stroke-linecap="round"/>
-              <path d="M52 102 Q40 118 48 137 Q80 146 116 137 Q125 118 112 102" fill="url(#welcomeKittenFur)" stroke="#b58acf" stroke-width="2.5"/>
-              <path d="M31 60 L37 20 Q39 15 44 20 L64 37 Q81 30 101 37 L123 20 Q128 16 129 22 L134 62 Q138 103 83 109 Q28 106 31 60Z" fill="url(#welcomeKittenFur)" stroke="#b58acf" stroke-width="2.5" stroke-linejoin="round"/>
-              <path d="M42 31 L46 49 L58 42Z M120 31 L108 43 L124 49Z" fill="#f293c2" opacity=".8"/>
-              <path d="M56 68 Q63 60 70 68 M96 68 Q103 60 110 68" fill="none" stroke="#713e69" stroke-width="3.3" stroke-linecap="round"/>
-              <ellipse cx="50" cy="79" rx="10" ry="5" fill="#ee8fbc" opacity=".52"/><ellipse cx="116" cy="79" rx="10" ry="5" fill="#ee8fbc" opacity=".52"/>
-              <path d="M79 74 Q83 71 87 74 L83 79Z" fill="#a25789"/>
-              <path d="M83 79 Q79 87 73 82 M83 79 Q87 87 93 82 M57 78 L35 74 M57 84 L35 88 M108 78 L131 74 M108 84 L131 88" fill="none" stroke="#713e69" stroke-width="1.9" stroke-linecap="round"/>
-              <path d="M83 116 C68 97 52 116 83 136 C114 116 98 97 83 116Z" fill="#e987bc" stroke="#d06da6" stroke-width="1.5"/>
-              <path d="M56 112 Q56 125 68 124 M109 112 Q110 125 98 124" fill="none" stroke="#b58acf" stroke-width="6" stroke-linecap="round"/>
-              <path d="M16 42 L18 36 L20 42 L26 44 L20 46 L18 52 L16 46 L10 44Z" fill="#d2b7ef"/>
-              <path d="M145 62 C136 52 132 64 145 71 C158 64 154 52 145 62Z" fill="#efa6cf"/>
-              <circle cx="139" cy="25" r="3" fill="#cdb3eb"/>
-            </svg>
-          </div>
+          <div class="welcome-kitten" aria-hidden="true"><img src="/assets/ui/together.svg" alt=""></div>
         </div>
         <div class="partner-shortcut">
           <button id="partnerBadge" class="partner-badge" type="button" aria-haspopup="dialog" aria-controls="partnerProfileModal" title="Открыть карточку партнёра">Вместе</button>
@@ -293,29 +262,29 @@
       </section>
 
       <nav class="main-tabs" aria-label="Разделы">
-        <button class="main-tab active" data-view="mailbox" type="button">✍️ Ящик</button>
-        <button class="main-tab" data-view="dates" type="button">💗 Свидания</button>
-        <button class="main-tab" data-view="our" type="button">🌷 Наше</button>
-        <button class="main-tab" data-view="games" type="button">🐱 Игры</button>
+        <button class="main-tab active" data-view="our" type="button"><img class="pixel-icon" src="/assets/ui/home.svg" alt="" aria-hidden="true"><span>Наш уголок</span></button>
+        <button class="main-tab " data-view="mailbox" type="button"><img class="pixel-icon" src="/assets/ui/mailbox.svg" alt="" aria-hidden="true"><span>Ящик</span></button>
+        <button class="main-tab " data-view="dates" type="button"><img class="pixel-icon" src="/assets/ui/date.svg" alt="" aria-hidden="true"><span>Свидания</span></button>
+        <button class="main-tab " data-view="games" type="button"><img class="pixel-icon" src="/assets/ui/game.svg" alt="" aria-hidden="true"><span>Игры</span></button>
+      </nav>
+      <nav id="mailboxSubnav" class="mailbox-subnav hidden" aria-label="Закладки книги писем">
+        <button class="mailbox-subtab" data-mailbox-view="mailbox" type="button" aria-label="Письма" title="Письма"><img class="pixel-icon" src="/assets/ui/letter.svg" alt="" aria-hidden="true"><span>Письма</span></button>
+        <button class="mailbox-subtab" data-mailbox-view="conversation" type="button" aria-label="Разговор" title="Разговор"><img class="pixel-icon" src="/assets/ui/conversation.svg" alt="" aria-hidden="true"><span>Разговор</span></button>
+        <button class="mailbox-subtab" data-mailbox-view="homework" type="button" aria-label="Разобрать отдельно" title="Разобрать отдельно"><img class="pixel-icon" src="/assets/ui/ice.svg" alt="" aria-hidden="true"><span>Разобрать отдельно</span></button>
+        <button class="mailbox-subtab" data-mailbox-view="agreements" type="button" aria-label="Договорённости" title="Договорённости"><img class="pixel-icon" src="/assets/ui/agreements.svg" alt="" aria-hidden="true"><span>Договорённости</span></button>
+        <button class="mailbox-subtab" data-mailbox-view="capsule" type="button" aria-label="Капсула тепла" title="Капсула тепла"><img class="pixel-icon" src="/assets/ui/capsule.svg" alt="" aria-hidden="true"><span>Капсула тепла</span></button>
       </nav>
 
-      <nav id="mailboxSubnav" class="mailbox-subnav" aria-label="Разделы ящика">
-        <button class="mailbox-subtab active" data-mailbox-view="mailbox" type="button">✍️ Ящик</button>
-        <button class="mailbox-subtab" data-mailbox-view="conversation" type="button">💬 Разговор</button>
-        <button class="mailbox-subtab" data-mailbox-view="homework" type="button">🧊 Домашнее задание</button>
-        <button class="mailbox-subtab" data-mailbox-view="capsule" type="button">💌 Капсула тепла</button>
-      </nav>
-
-      <section id="mailboxView" class="view active">
+      <section id="mailboxView" class="view hidden">
         <div class="grid-layout">
           <article class="write-card card info-card-host">
             <button id="activeViewInfoBtn" class="info-heart-button active-view-info-button" data-info-key="mailbox" type="button" aria-label="Открыть подсказку раздела" title="О разделе">
               <span class="info-pixel-heart" aria-hidden="true"></span>
             </button>
-            <div class="card-kicker">новая запись</div>
+            <div class="card-kicker">ПИСЬМО ДО РАЗГОВОРА</div><h3>О чём хочется рассказать?</h3>
             <div class="category-switch" role="group" aria-label="Категория записи">
-              <button class="category-button selected" data-category="sweet" type="button">🍬 <span>Сладость</span></button>
-              <button class="category-button" data-category="hard" type="button">🧊 <span>Гадость</span></button>
+              <button class="category-button selected" data-category="sweet" type="button"><img class="pixel-icon" src="/assets/ui/candy.svg" alt="" aria-hidden="true"> <span>Сладость</span></button>
+              <button class="category-button" data-category="hard" type="button"><img class="pixel-icon" src="/assets/ui/ice.svg" alt="" aria-hidden="true"> <span>Гадость</span></button>
             </div>
             <textarea id="noteBody" maxlength="3500" placeholder="Напиши сюда то, что хочется сохранить…"></textarea>
             <div class="write-footer">
@@ -324,7 +293,7 @@
             </div>
             <p id="writeHint" class="small-note">Партнёр увидит запись в выбранный день.</p>
             <article id="encouragementCard" class="encouragement-card card hidden" aria-live="polite">
-              <div class="mini-cat" aria-hidden="true">🐱</div>
+              <div class="mini-cat" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/cat.svg" alt="" aria-hidden="true"></div>
               <div id="encouragementText">Здесь можно быть честными. Даже маленький шаг уже считается.</div>
             </article>
           </article>
@@ -332,8 +301,8 @@
           <aside class="side-column">
             <article class="count-card card">
               <div class="card-kicker">только твоё</div>
-              <div class="count-row"><span>🍬 Мои сладости</span><strong id="sweetCount">0</strong></div>
-              <div class="count-row"><span>🧊 Мои гадости</span><strong id="hardCount">0</strong></div>
+              <div class="count-row"><span><img class="pixel-icon" src="/assets/ui/candy.svg" alt="" aria-hidden="true"> Мои сладости</span><strong id="sweetCount">0</strong></div>
+              <div class="count-row"><span><img class="pixel-icon" src="/assets/ui/ice.svg" alt="" aria-hidden="true"> Мои гадости</span><strong id="hardCount">0</strong></div>
               <p class="small-note">Партнёр видит только свои счётчики.</p>
               <div id="scheduledMini" class="scheduled-mini"></div>
             </article>
@@ -343,6 +312,7 @@
         <section id="achievementStrip" class="achievement-strip hidden"></section>
       </section>
 
+      <section id="agreementsView" class="view hidden"></section>
       <section id="conversationView" class="view hidden">
         <article class="date-controls-card card">
           <div class="card-kicker">разговор</div>
@@ -367,8 +337,8 @@
             <h3>Удалось решить вопрос?</h3>
             <p class="muted">Отметьте итог.</p>
             <div id="talkOutcomeActions" class="outcome-actions">
-              <button class="button outcome-yes" data-outcome="resolved" type="button">Да, решили ✨</button>
-              <button class="button outcome-no" data-outcome="not_yet" type="button">Пока нет 🤍</button>
+              <button class="button outcome-yes" data-outcome="resolved" type="button">Да, решили <img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"></button>
+              <button class="button outcome-no" data-outcome="not_yet" type="button">Пока нет <img class="pixel-icon" src="/assets/ui/heart.svg" alt="" aria-hidden="true"></button>
             </div>
             <div id="talkOutcomeMessage" class="outcome-message hidden"></div>
           </article>
@@ -396,7 +366,7 @@
           <div class="card-kicker">доброе, которое хочется сохранить</div>
           <h3>Капсула тепла</h3>
           <p class="muted">Сохраняйте тёплые моменты.</p>
-          <button id="openCapsuleButton" class="button primary" type="button">Открыть случайную запись ✨</button>
+          <button id="openCapsuleButton" class="button primary" type="button">Открыть случайную запись <img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"></button>
           <div id="capsuleResult" class="capsule-result hidden"></div>
           <details class="our-details">
             <summary>Добавить тёплую запись вручную</summary>
@@ -414,8 +384,8 @@
 
       <section id="datesView" class="view hidden">
         <div class="date-subtabs" role="tablist" aria-label="Свидания">
-          <button class="date-subtab active" data-date-subtab="random" type="button">🎲 Случайная идея</button>
-          <button class="date-subtab" data-date-subtab="successful" type="button">🌟 Удавшиеся свидания</button>
+          <button class="date-subtab active" data-date-subtab="random" type="button"><img class="pixel-icon" src="/assets/ui/game.svg" alt="" aria-hidden="true"> Случайная идея</button>
+          <button class="date-subtab" data-date-subtab="successful" type="button"><img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"> Удавшиеся свидания</button>
         </div>
         <div id="dateRandomPanel" class="date-subpanel">
           <div class="ideas-hero card">
@@ -426,15 +396,15 @@
               <div class="date-choice-group">
                 <span>Как хочется?</span>
                 <div class="date-choice-buttons">
-                  <button class="date-choice-button" data-date-kind="budget" type="button">🌷 Уютно</button>
-                  <button class="date-choice-button pinker" data-date-kind="treat" type="button">✨ Особенно</button>
+                  <button class="date-choice-button" data-date-kind="budget" type="button"><img class="pixel-icon" src="/assets/ui/flower.svg" alt="" aria-hidden="true"> Уютно</button>
+                  <button class="date-choice-button pinker" data-date-kind="treat" type="button"><img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"> Особенно</button>
                 </div>
               </div>
               <div class="date-choice-group">
                 <span>Где?</span>
                 <div class="date-choice-buttons">
-                  <button class="date-choice-button" data-date-place="outside" type="button">🌿 Снаружи</button>
-                  <button class="date-choice-button pinker" data-date-place="inside" type="button">🫖 Внутри</button>
+                  <button class="date-choice-button" data-date-place="outside" type="button"><img class="pixel-icon" src="/assets/ui/flower.svg" alt="" aria-hidden="true"> Снаружи</button>
+                  <button class="date-choice-button pinker" data-date-place="inside" type="button"><img class="pixel-icon" src="/assets/ui/tea.svg" alt="" aria-hidden="true"> Внутри</button>
                 </div>
               </div>
             </div>
@@ -473,7 +443,7 @@
         </div>
       </section>
 
-      <section id="ourView" class="view hidden">
+      <section id="ourView" class="view">
         <div class="our-grid">
           <article class="card decisions-card">
             <div class="card-kicker">когда никак не выбрать</div>
@@ -483,7 +453,7 @@
               <label>Тип вопроса
                 <select id="decisionKind" name="kind" aria-label="Тип решения"></select>
               </label>
-              <button id="chooseDecisionButton" class="button primary" type="button">Выбрать ответ 🎲</button>
+              <button id="chooseDecisionButton" class="button primary" type="button">Выбрать ответ <img class="pixel-icon" src="/assets/ui/game.svg" alt="" aria-hidden="true"></button>
             </div>
             <div id="decisionResult" class="decision-result hidden"></div>
             <details class="decision-custom-details">
@@ -562,22 +532,22 @@
               <summary>Показать скрытые желания</summary>
               <div id="intimateWishHiddenList" class="wish-list"></div>
             </details>
-            <p id="intimateWishHint" class="small-note wish-hint">Запись можно открыть или скрыть.</p>
+            </details><p id="intimateWishHint" class="small-note wish-hint">Запись можно открыть или скрыть.</p>
           </article>
         </div>
       </section>
 
       <section id="gamesView" class="view hidden" aria-labelledby="gamesTitle">
         <div id="gamesSubnav" class="games-subtabs" role="tablist" aria-label="Мини-игры">
-          <button class="game-subtab active" data-game-subtab="truths" type="button">💌 Две правды и мечта</button>
+          <button class="game-subtab active" data-game-subtab="truths" type="button"><img class="pixel-icon" src="/assets/ui/letter.svg" alt="" aria-hidden="true"> Две правды и мечта</button>
           <button class="game-subtab" data-game-subtab="runner" type="button">Любимое село</button>
-          <button class="game-subtab" data-game-subtab="tictactoe" type="button">🐾 Крестики-нолики</button>
+          <button class="game-subtab" data-game-subtab="tictactoe" type="button"><img class="pixel-icon" src="/assets/ui/cat.svg" alt="" aria-hidden="true"> Крестики-нолики</button>
         </div>
 
         <div id="gameTruthsPanel" class="game-subpanel">
           <article class="card games-page-card">
             <div class="games-modal-heading">
-              <span class="games-modal-cat" aria-hidden="true">💌</span>
+              <span class="games-modal-cat" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/letter.svg" alt="" aria-hidden="true"></span>
               <div>
                 <div class="card-kicker">игра для двоих</div>
                 <h3 id="gamesTitle">Две правды и одна мечта</h3>
@@ -593,7 +563,7 @@
             <div class="truths-builder-card">
               <div class="truths-builder-header">
                 <h4>Загадать раунд</h4>
-                <button id="truthTopicBtn" class="quiet-button topic-hint-btn" type="button">✨ Тема</button>
+                <button id="truthTopicBtn" class="quiet-button topic-hint-btn" type="button"><img class="pixel-icon" src="/assets/ui/star.svg" alt="" aria-hidden="true"> Тема</button>
               </div>
               <p id="truthTopicHint" class="truth-topic-banner hidden"></p>
               <form id="truthsCreateForm" class="truths-form">
@@ -606,7 +576,7 @@
                 <label>Мечта
                   <textarea id="dreamInput" name="dream" rows="2" maxlength="350" placeholder="Напиши желание" required></textarea>
                 </label>
-                <button class="button primary" type="submit">Загадать 💌</button>
+                <button class="button primary" type="submit">Загадать <img class="pixel-icon" src="/assets/ui/letter.svg" alt="" aria-hidden="true"></button>
               </form>
             </div>
 
@@ -664,7 +634,7 @@
         <div id="gameTictactoePanel" class="game-subpanel hidden">
           <article class="card games-page-card">
             <div class="games-modal-heading">
-              <span class="games-modal-cat" aria-hidden="true">🐾</span>
+              <span class="games-modal-cat" aria-hidden="true"><img class="pixel-icon" src="/assets/ui/cat.svg" alt="" aria-hidden="true"></span>
               <div>
                 <div class="card-kicker">обычная партия</div>
                 <h3>Крестики-нолики</h3>
@@ -711,6 +681,9 @@
 
     </main>
   </section>
-  <script src="/app.js"></script>
+  <script src="/app.js?v=33"></script>
+  <script src="/redesign.js?v=33"></script>
+  <script src="/backup.js?v=33"></script>
+  <script src="/settings.js?v=33"></script>
 </body>
 </html>

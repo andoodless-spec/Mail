@@ -3,7 +3,7 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 
 let appState = null;
 let selectedCategory = 'sweet';
-let activeView = 'mailbox';
+let activeView = 'our';
 let lastReminderKey = null;
 let homeworkState = null;
 const homeworkDrafts = new Map();
@@ -15,7 +15,8 @@ let personalizationDraft = null;
 let partnerProfileData = null;
 let partnerProfileEditing = false;
 
-const PERSONAL_THEME_KEYS = ['white', 'pink', 'purple', 'blue', 'yellow', 'cyan'];
+const PERSONAL_THEME_KEYS = ['pink', 'purple', 'blue'];
+const HOME_BLOCKS = ['decisions', 'agreements', 'wishes', 'intimate'];
 const THEME_LABELS = {
   white: 'Белая', pink: 'Розовая', purple: 'Фиолетовая', blue: 'Синяя', yellow: 'Жёлтая', cyan: 'Голубая',
 };
@@ -23,14 +24,14 @@ const THEME_BROWSER_COLORS = {
   white: '#fffdfa', pink: '#ffedf5', purple: '#fbf8ff', blue: '#f7fbff', yellow: '#fffdf5', cyan: '#f5ffff',
 };
 const TAB_ORDER_DEFAULTS = {
-  main: ['mailbox', 'dates', 'our', 'games'],
-  mailbox: ['mailbox', 'conversation', 'homework', 'capsule'],
+  main: ['our', 'mailbox', 'dates', 'games'],
+  mailbox: ['mailbox', 'conversation', 'homework', 'agreements', 'capsule'],
   games: ['truths', 'runner', 'tictactoe'],
   dates: ['random', 'successful'],
 };
 const TAB_ORDER_LABELS = {
-  main: { mailbox: 'Ящик', dates: 'Свидания', our: 'Наше', games: 'Игры' },
-  mailbox: { mailbox: 'Ящик', conversation: 'Разговор', homework: 'Домашнее', capsule: 'Капсула' },
+  main: { mailbox: 'Ящик', dates: 'Свидания', our: 'Наш уголок', games: 'Игры' },
+  mailbox: { mailbox: 'Письма', conversation: 'Разговор', homework: 'Разобрать отдельно', agreements: 'Договорённости', capsule: 'Капсула тепла' },
   games: { truths: 'Две правды', runner: 'Любимое село', tictactoe: 'Крестики' },
   dates: { random: 'Случайная идея', successful: 'Удавшиеся' },
 };
@@ -66,16 +67,29 @@ function normalizeTabOrder(value, fallback) {
 }
 
 function normalizeClientPreferences(value = {}) {
-  const raw = value && typeof value === 'object' ? value : {};
+  const raw = (typeof value === 'string' ? (() => { try { return JSON.parse(value); } catch { return {}; } })() : value && typeof value === 'object' && !Array.isArray(value) ? value : {});
+  const theme = PERSONAL_THEME_KEYS.includes(raw.theme) ? raw.theme : raw.theme === 'cyan' ? 'blue' : 'pink';
+  const homeTitles = {};
+  for (const key of HOME_BLOCKS) if (typeof raw.homeTitles?.[key] === 'string' && raw.homeTitles[key].trim()) homeTitles[key] = raw.homeTitles[key].trim().slice(0, 60);
   return {
-    theme: PERSONAL_THEME_KEYS.includes(raw.theme) ? raw.theme : 'pink',
-    orders: Object.fromEntries(Object.entries(TAB_ORDER_DEFAULTS).map(([key, fallback]) => [key, normalizeTabOrder(raw.orders?.[key], fallback)])),
+    appearanceVersion: 33,
+    theme,
+    mode: ['light', 'dark', 'system'].includes(raw.mode) ? raw.mode : 'light',
+    homeOrder: normalizeTabOrder(raw.homeOrder, HOME_BLOCKS),
+    homeHidden: [...new Set((Array.isArray(raw.homeHidden) ? raw.homeHidden : []).filter(key => HOME_BLOCKS.includes(key)))],
+    homeTitles,
+    orders: {
+      main: normalizeTabOrder(raw.orders?.main, TAB_ORDER_DEFAULTS.main),
+      mailbox: normalizeTabOrder(raw.orders?.mailbox, TAB_ORDER_DEFAULTS.mailbox),
+      games: normalizeTabOrder(raw.orders?.games, TAB_ORDER_DEFAULTS.games),
+      dates: normalizeTabOrder(raw.orders?.dates, TAB_ORDER_DEFAULTS.dates),
+    },
   };
 }
 
 const ENCOURAGEMENTS = {
   sweet: [
-    'Как хорошо, что ты заметил(а) это. Сладкое тоже важно сохранять 💌',
+    'Как хорошо, что ты заметил(а) это. Сладкое тоже важно сохранять ',
     'Маленькая радость уже нашла своё место. Ты молодец, что поделился(ась).',
     'Пусть таких моментов станет побольше. Ящик бережно всё сохранит.',
   ],
@@ -467,6 +481,7 @@ async function localApi(path, options = {}) {
     if (method !== 'POST') throw new Error('Метод персонализации не поддерживается.');
     const current = normalizeClientPreferences(user.preferences);
     const next = normalizeClientPreferences({
+      ...current, ...data,
       theme: data.theme === undefined ? current.theme : data.theme,
       orders: { ...current.orders, ...(data.orders && typeof data.orders === 'object' ? data.orders : {}) },
     });
@@ -988,6 +1003,11 @@ async function localApi(path, options = {}) {
   throw new Error('Неизвестный запрос.');
 }
 
+function localFallbackResponse(path, options) {
+  if (document.documentElement) document.documentElement.dataset.storage = 'local';
+  return localApi(path, options);
+}
+
 async function api(path, options = {}) {
   try {
     const response = await fetch(path, {
@@ -997,12 +1017,13 @@ async function api(path, options = {}) {
       headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     });
     const contentType = response.headers.get('content-type') || '';
-    if (response.status === 404 || !contentType.includes('application/json')) return localApi(path, options);
+    if (response.status === 404 || !contentType.includes('application/json')) return localFallbackResponse(path, options);
     const data = await response.json().catch(() => ({ ok: false, error: 'Неожиданный ответ сервера.' }));
     if (!response.ok || data.ok === false) throw new Error(data.error || 'Что-то пошло не так.');
+    if (document.documentElement) document.documentElement.dataset.storage = 'cloud';
     return data;
   } catch (error) {
-    if (error instanceof TypeError) return localApi(path, options);
+    if (error instanceof TypeError) return localFallbackResponse(path, options);
     throw error;
   }
 }
@@ -1075,6 +1096,69 @@ function applyPersonalization(preferences) {
   return normalized;
 }
 
+// Порядок вкладок меняется перетаскиванием: Pointer Events покрывают и мышь,
+// и палец, а слушатели висят на документе, чтобы жест не прерывался, когда
+// список переставляется прямо под курсором.
+function attachOrderDrag(list, group) {
+  if (!list || !personalizationDraft) return;
+  let dragging = null;
+  let startY = 0;
+  let moved = false;
+  const items = () => [...list.querySelectorAll('[data-order-item]')];
+  function finish() {
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', finish);
+    document.removeEventListener('pointercancel', finish);
+    if (!dragging) return;
+    dragging.classList.remove('is-dragging');
+    list.classList.remove('is-dragging');
+    dragging = null;
+    if (!moved) return;
+    personalizationDraft.orders[group] = items().map((item) => item.dataset.orderKey);
+    renderPersonalizationModal();
+  }
+  function onMove(event) {
+    if (!dragging) return;
+    if (Math.abs(event.clientY - startY) > 4) moved = true;
+    if (!moved) return;
+    event.preventDefault();
+    const others = items().filter((item) => item !== dragging);
+    const next = others.find((item) => {
+      const box = item.getBoundingClientRect();
+      return event.clientY < box.top + box.height / 2;
+    });
+    if (next) list.insertBefore(dragging, next);
+    else if (others.length) list.append(dragging);
+  }
+  list.querySelectorAll('[data-order-grip]').forEach((grip) => {
+    grip.addEventListener('pointerdown', (event) => {
+      if (event.button && event.button !== 0) return;
+      dragging = grip.closest('[data-order-item]');
+      moved = false;
+      startY = event.clientY;
+      dragging.classList.add('is-dragging');
+      list.classList.add('is-dragging');
+      document.addEventListener('pointermove', onMove, { passive: false });
+      document.addEventListener('pointerup', finish);
+      document.addEventListener('pointercancel', finish);
+      event.preventDefault();
+    });
+    // Ручка остаётся доступной с клавиатуры: стрелки на ней двигают строку.
+    grip.addEventListener('keydown', (event) => {
+      if (!['ArrowUp', 'ArrowDown', 'Enter', ' '].includes(event.key)) return;
+      event.preventDefault();
+      const order = items();
+      const index = order.indexOf(grip.closest('[data-order-item]'));
+      const destination = event.key === 'ArrowDown' ? index + 1 : index - 1;
+      if (index < 0 || destination < 0 || destination >= order.length) return;
+      [order[index], order[destination]] = [order[destination], order[index]];
+      personalizationDraft.orders[group] = order.map((row) => row.dataset.orderKey);
+      renderPersonalizationModal();
+      document.querySelector(`[data-order-list="${group}"] [data-order-item]:nth-child(${destination + 1}) [data-order-grip]`)?.focus();
+    });
+  });
+}
+
 function renderPersonalizationModal() {
   if (!personalizationDraft) return;
   const themeChoices = $('#themeChoices');
@@ -1084,14 +1168,18 @@ function renderPersonalizationModal() {
     <button class="theme-choice ${personalizationDraft.theme === theme ? 'selected' : ''}" type="button" data-theme-choice="${theme}" aria-pressed="${personalizationDraft.theme === theme}">
       <span class="theme-dot theme-dot-${theme}" aria-hidden="true"></span><span>${THEME_LABELS[theme]}</span>
     </button>`).join('');
-  tabOrderControls.innerHTML = Object.entries(TAB_ORDER_DEFAULTS).map(([group, fallback]) => `
+  tabOrderControls.innerHTML = Object.entries(TAB_ORDER_DEFAULTS).map(([group]) => `
     <section class="tab-order-group" data-order-group="${group}">
       <h5>${TAB_ORDER_TITLES[group]}</h5>
-      <div class="tab-order-list">${personalizationDraft.orders[group].map((key, index) => `
-        <div class="tab-order-item"><span>${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}</span>
-          <span class="tab-order-moves"><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="-1" aria-label="Переместить выше" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="1" aria-label="Переместить ниже" ${index === fallback.length - 1 ? 'disabled' : ''}>↓</button></span>
+      <div class="tab-order-list" data-order-list="${group}">${personalizationDraft.orders[group].map((key, index) => `
+        <div class="tab-order-item" data-order-item data-order-key="${key}">
+          <button type="button" class="tab-order-grip" data-order-grip aria-label="Перетащить: ${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}" title="Перетащить мышью или пальцем">⠿</button>
+          <span class="tab-order-label">${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}</span>
+          <span class="tab-order-moves"><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="-1" aria-label="Переместить выше: ${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-order-move="${group}" data-order-index="${index}" data-order-direction="1" aria-label="Переместить ниже: ${escapeHtml(TAB_ORDER_LABELS[group][key] || key)}" ${index === personalizationDraft.orders[group].length - 1 ? 'disabled' : ''}>↓</button></span>
         </div>`).join('')}</div>
     </section>`).join('');
+  tabOrderControls.querySelectorAll('[data-order-list]').forEach((list) => attachOrderDrag(list, list.dataset.orderList));
+
   themeChoices.querySelectorAll('[data-theme-choice]').forEach((button) => button.addEventListener('click', () => {
     personalizationDraft.theme = button.dataset.themeChoice;
     renderPersonalizationModal();
@@ -1111,7 +1199,13 @@ function openPersonalization() {
   if (!appState) return;
   personalizationDraft = normalizeClientPreferences(appState.preferences);
   renderPersonalizationModal();
-  openModal('personalizationModal');
+  // Отдельного окна больше нет: оформление живёт во вкладке настроек.
+  if (typeof globalThis.settingsActivateTab === 'function') {
+    if (document.querySelector('#settingsModal')?.classList.contains('hidden')) openModal('settingsModal');
+    globalThis.settingsActivateTab('appearance');
+  } else {
+    openModal('settingsModal');
+  }
 }
 
 async function savePersonalization() {
@@ -1122,8 +1216,9 @@ async function savePersonalization() {
     const result = await api('/api/preferences', { method: 'POST', body: JSON.stringify(personalizationDraft) });
     appState.preferences = normalizeClientPreferences(result.preferences);
     applyPersonalization(appState.preferences);
-    closeModal('personalizationModal');
-    personalizationDraft = null;
+    // Настройки остаются открытыми: человек может сразу поправить что-то ещё.
+    personalizationDraft = normalizeClientPreferences(appState.preferences);
+    renderPersonalizationModal();
     showToast('Твой вид ящика сохранён.');
   } catch (error) {
     showToast(error.message);
@@ -1299,7 +1394,7 @@ function updateFullscreenButtons() {
   $$('.game-fullscreen-button').forEach((button) => {
     const target = $(`#${button.dataset.fullscreenTarget}`);
     const isCurrent = Boolean(target && (current === target || isFallbackFullscreen(target)));
-    button.textContent = isCurrent ? '×' : '⛶';
+    button.textContent = isCurrent ? '×' : '';
     button.setAttribute('aria-label', isCurrent ? 'Выйти из полноэкранного режима' : 'Развернуть игру на весь экран');
     button.title = isCurrent ? 'Свернуть' : 'На весь экран';
   });
@@ -1398,8 +1493,8 @@ function renderTalkOutcome() {
   actions.classList.add('hidden');
   message.classList.remove('hidden');
   message.textContent = outcome.result === 'resolved'
-    ? 'Вы молодцы, что смогли поговорить и найти решение. Так держать — маленькие честные разговоры правда меняют всё ✨'
-    : 'Не всё обязано решиться за один разговор. Вы уже сделали важный шаг. Можно вернуться к этому позже — бережно, без обвинений, вы разберётесь 🤍';
+    ? 'Вы молодцы, что смогли поговорить и найти решение. Так держать — маленькие честные разговоры правда меняют всё '
+    : 'Не всё обязано решиться за один разговор. Вы уже сделали важный шаг. Можно вернуться к этому позже — бережно, без обвинений, вы разберётесь ';
 }
 
 function rememberHomeworkDrafts() {
@@ -1429,7 +1524,7 @@ function renderHomework() {
   const hardNotes = (appState.notes || []).filter((note) => note.category === 'hard' && !selectedIds.has(note.id));
   picker.classList.remove('hidden');
   picker.innerHTML = hardNotes.length
-    ? `<p class="small-note">Можно выбрать ещё любую гадость для отдельного разбора:</p>${hardNotes.map((note) => `<button data-homework-note="${note.id}">🧊 ${escapeHtml(note.body)}</button>`).join('')}`
+    ? `<p class="small-note">Можно выбрать ещё любую гадость для отдельного разбора:</p>${hardNotes.map((note) => `<button data-homework-note="${note.id}"> ${escapeHtml(note.body)}</button>`).join('')}`
     : cases.length ? '<p class="small-note">Все выбранные гадости уже добавлены в домашние задания.</p>' : '<p class="small-note">Гадостей для отдельного разбора пока нет. Если захочется, добавьте одну в ящик.</p>';
   picker.querySelectorAll('[data-homework-note]').forEach((button) => button.addEventListener('click', () => chooseHomework(Number(button.dataset.homeworkNote))));
   if (!cases.length) { active.classList.add('hidden'); active.innerHTML = ''; return; }
@@ -1437,7 +1532,7 @@ function renderHomework() {
   active.innerHTML = cases.map((item) => {
     const draft = homeworkDrafts.has(String(item.id)) ? homeworkDrafts.get(String(item.id)) : (item.my_answer?.body || '');
     return `<article class="homework-case-block">
-    <div class="homework-problem"><span>🧊 выбранная гадость</span><p>${escapeHtml(item.problem)}</p></div>
+    <div class="homework-problem"><span> выбранная гадость</span><p>${escapeHtml(item.problem)}</p></div>
     <form class="homework-form" data-homework-form="${item.id}">
       <label>Твой взгляд на ситуацию и решение
         <textarea name="body" maxlength="3500" placeholder="Опиши всё в красках: что произошло, что ты почувствовал(а) и как, по-твоему, это можно решить…" required>${escapeHtml(draft)}</textarea>
@@ -1460,7 +1555,7 @@ function renderHomework() {
   active.querySelectorAll('[data-close-homework]').forEach((button) => button.addEventListener('click', async () => {
     await api('/api/homework', { method: 'POST', body: JSON.stringify({ action: 'close', case_id: button.dataset.closeHomework }) });
     homeworkDrafts.delete(String(button.dataset.closeHomework));
-    showToast('Домашнее задание закрыто. Вы справились с важным шагом 💗');
+    showToast('Домашнее задание закрыто. Вы справились с важным шагом ');
     await loadHomework();
   }));
 }
@@ -1507,8 +1602,8 @@ async function saveOutcome(result) {
   try {
     await api('/api/outcome', { method: 'POST', body: JSON.stringify({ result }) });
     renderEncouragement(result === 'resolved' ? 'sweet' : 'hard');
-    showToast(result === 'resolved' ? 'Вы молодцы, так держать ✨' : 'Всё хорошо. Разберёмся маленькими шагами.');
-    showToast(`Новая ачивка: ${ACHIEVEMENT_LABELS[result === 'resolved' ? 'talk_resolved' : 'talk_kept_trying']} ✦`);
+    showToast(result === 'resolved' ? 'Вы молодцы, так держать ' : 'Всё хорошо. Разберёмся маленькими шагами.');
+    showToast(`Новая ачивка: ${ACHIEVEMENT_LABELS[result === 'resolved' ? 'talk_resolved' : 'talk_kept_trying']} `);
     await refresh();
   } catch (error) { showToast(error.message); }
 }
@@ -1556,10 +1651,11 @@ function renderState() {
   if (conversationIsOpen) {
     revealed.classList.remove('hidden');
     $('#notesList').innerHTML = appState.notes.length
-      ? appState.notes.map((note) => `<article class="note-item"><div class="note-meta"><span class="note-author">${note.category === 'sweet' ? '🍬' : '🧊'} ${escapeHtml(note.author)}</span><span>${escapeHtml(prettyNoteDate(note.created_at))}</span></div><div class="note-body">${escapeHtml(note.body)}</div><div class="note-actions">${note.category === 'sweet' ? `<button data-save-capsule="${note.id}">Сохранить в капсулу тепла</button>` : `<button data-homework-note="${note.id}">В домашнее задание</button><button data-delete-note="${note.id}">Удалить — решено</button>`}</div></article>`).join('')
+      ? appState.notes.map((note) => `<article class="note-item"><div class="note-meta"><span class="note-author">${note.category === 'sweet' ? '<img class="pixel-icon" src="/assets/ui/candy.svg" alt="Сладость">' : '<img class="pixel-icon" src="/assets/ui/ice.svg" alt="Гадость">'} ${escapeHtml(note.author)}</span><span>${escapeHtml(prettyNoteDate(note.created_at))}</span></div><div class="note-body">${escapeHtml(note.body)}</div><div class="note-actions">${note.category === 'sweet' ? `<button data-save-capsule="${note.id}">Сохранить в капсулу тепла</button>` : `<button data-homework-note="${note.id}">В домашнее задание</button><button data-delete-note="${note.id}">Удалить — решено</button>`}</div></article>`).join('')
       : '<article class="note-item"><div class="note-body">В ящике пока пусто. Можно просто поговорить о том, что сейчас между вами.</div></article>';
   } else {
     revealed.classList.add('hidden');
+    $('#notesList').replaceChildren();
   }
   $('#notesList').querySelectorAll('[data-save-capsule]').forEach((button) => button.addEventListener('click', () => saveNoteToCapsule(Number(button.dataset.saveCapsule))));
   $('#notesList').querySelectorAll('[data-homework-note]').forEach((button) => button.addEventListener('click', () => chooseHomework(Number(button.dataset.homeworkNote))));
@@ -1606,7 +1702,7 @@ async function saveNoteToCapsule(noteId) {
   if (!note) return;
   try {
     await api('/api/capsule', { method: 'POST', body: JSON.stringify({ body: note.body, source_note_id: note.id }) });
-    showToast('Сладость сохранена в Капсулу тепла ✨');
+    showToast('Сладость сохранена в Капсулу тепла ');
     await loadOurData();
   } catch (error) { showToast(error.message); }
 }
@@ -1628,8 +1724,8 @@ async function saveNote() {
     $('#noteBody').value = '';
     $('#charCount').textContent = '0 / 3500';
     renderEncouragement(selectedCategory);
-    showToast(selectedCategory === 'hard' ? 'Сохранено. Спасибо, что поделился(ась) — разберёмся вместе 💗' : 'Сохранено в тихий ящик 💌');
-    if (result.achievement) showToast(`Новая ачивка: ${ACHIEVEMENT_LABELS[result.achievement.kind] || 'важный шаг'} ✦`);
+    showToast(selectedCategory === 'hard' ? 'Сохранено. Спасибо, что поделился(ась) — разберёмся вместе ' : 'Сохранено в тихий ящик ');
+    if (result.achievement) showToast(`Новая ачивка: ${ACHIEVEMENT_LABELS[result.achievement.kind] || 'важный шаг'} `);
     await refresh();
   } catch (error) { showToast(error.message); }
 }
@@ -1650,7 +1746,7 @@ async function talkNow() {
   try {
     await api('/api/open', { method: 'POST', body: JSON.stringify({ now: true }) });
     renderEncouragement('hard');
-    showToast('Записи открыты. Вы справитесь вместе 💗');
+    showToast('Записи открыты. Вы справитесь вместе ');
     await refresh();
   } catch (error) { showToast(error.message); }
 }
@@ -1667,7 +1763,7 @@ async function finishCycle() {
 }
 
 function switchView(view) {
-  const mailboxViews = ['mailbox', 'conversation', 'homework', 'capsule'];
+  const mailboxViews = ['mailbox', 'conversation', 'homework', 'agreements', 'capsule'];
   const inMailbox = mailboxViews.includes(view);
   activeView = view;
   setActiveViewInfo(VIEW_INFO_KEYS[view] || 'mailbox');
@@ -1688,7 +1784,7 @@ function switchView(view) {
   if (view === 'homework') loadHomework();
   if (view === 'capsule') loadOurData();
   if (view === 'dates') loadIdeaLists('date');
-  if (view === 'our') loadOurData();
+  if (view === 'our' || view === 'agreements') loadOurData();
 }
 
 async function drawIdea(kind, targetId, place = selectedDatePlace) {
@@ -1696,11 +1792,11 @@ async function drawIdea(kind, targetId, place = selectedDatePlace) {
   try {
     const result = await api(`/api/ideas?kind=${encodeURIComponent(kind)}&place=${encodeURIComponent(place)}&draw=1`);
     const target = $(`#${targetId}`);
-    if (!result.idea) { target.textContent = 'В этой категории пока нет идей — добавьте свою 💗'; target.classList.remove('hidden'); return; }
+    if (!result.idea) { target.textContent = 'В этой категории пока нет идей — добавьте свою '; target.classList.remove('hidden'); return; }
     selectedDateIdea = { kind, place, text: String(result.idea.text || '').trim() };
     target.innerHTML = `<span><b class="idea-label">${kind === 'budget' ? 'Уютно' : 'Особенно'} · ${place === 'outside' ? 'Снаружи' : 'Внутри'}</b><br>${escapeHtml(selectedDateIdea.text)}</span>
       <div class="idea-decision">
-        <button data-date-answer="yes">Наше 💗</button>
+        <button data-date-answer="yes">Наше </button>
         <button data-date-answer="no">Дальше</button>
       </div>
       <button class="idea-again" data-draw-again="${escapeHtml(kind)}">Показать другую идею →</button>`;
@@ -1713,7 +1809,7 @@ async function drawIdea(kind, targetId, place = selectedDatePlace) {
 
 function showDateYesForm(target) {
   target.classList.add('selected');
-  target.querySelector('.idea-decision').innerHTML = '<span>Оставляем эту идею видимой ✨</span>';
+  target.querySelector('.idea-decision').innerHTML = '<span>Оставляем эту идею видимой </span>';
   target.querySelector('.idea-again')?.remove();
   const followup = document.createElement('div');
   followup.className = 'idea-followup';
@@ -1745,7 +1841,7 @@ async function saveDateHistory(status, target) {
   const reflection = target.querySelector('[data-date-reflection]')?.value.trim() || '';
   const reason = target.querySelector('[data-date-reason]')?.value.trim() || '';
   const alternative = target.querySelector('[data-date-alternative]')?.value.trim() || '';
-  if (status === 'completed' && reflection.length < 3) { showToast('Расскажите хотя бы пару слов о свидании 💗'); field?.focus(); return; }
+  if (status === 'completed' && reflection.length < 3) { showToast('Расскажите хотя бы пару слов о свидании '); field?.focus(); return; }
   if (status === 'declined' && reason.length < 3) { showToast('Напишите, почему идея не подошла — это поможет выбрать лучше.'); field?.focus(); return; }
   try {
     await api('/api/date-history', { method: 'POST', body: JSON.stringify({ kind: selectedDateIdea.kind, place: selectedDateIdea.place, idea: selectedDateIdea.text, status, reason, alternative, reflection, repeat: target.querySelector('[data-date-repeat]')?.value === 'yes' }) });
@@ -1753,15 +1849,15 @@ async function saveDateHistory(status, target) {
       await api('/api/ideas', { method: 'POST', body: JSON.stringify({ kind: selectedDateIdea.kind, place: selectedDateIdea.place, text: selectedDateIdea.text, hidden: true }) });
     }
     if (status === 'completed') {
-      target.querySelector('.idea-followup').innerHTML = '<div class="idea-no-message">Сохранила вашу маленькую историю в «Удавшиеся свидания» 🌟 Можно перечитать её в любой момент.</div>';
-      showToast('Свидание сохранено в вашу историю 🌟');
-      showToast(`Новая ачивка: ${ACHIEVEMENT_LABELS.date_together} ✦`);
+      target.querySelector('.idea-followup').innerHTML = '<div class="idea-no-message">Сохранила вашу маленькую историю в «Удавшиеся свидания»  Можно перечитать её в любой момент.</div>';
+      showToast('Свидание сохранено в вашу историю ');
+      showToast(`Новая ачивка: ${ACHIEVEMENT_LABELS.date_together} `);
       await loadSuccessfulDates();
       await refresh();
     } else {
       target.querySelector('.idea-followup').innerHTML = `<div class="idea-no-message">Спасибо, теперь понятно, что не подошло. ${alternative ? 'Попробуйте учесть вашу идею: ' + escapeHtml(alternative) : 'Давайте найдём что-то мягче.'}</div><button class="button secondary" data-new-date-idea>Показать другой вариант</button>`;
       target.querySelector('[data-new-date-idea]').addEventListener('click', () => drawIdea(selectedDateIdea.kind, 'dateIdeaResult', selectedDateIdea.place));
-      showToast('Ничего страшного — в другой раз будет лучше 🤍');
+      showToast('Ничего страшного — в другой раз будет лучше ');
       await refresh();
     }
   } catch (error) { showToast(error.message); }
@@ -1773,8 +1869,8 @@ async function loadSuccessfulDates() {
     const target = $('#successfulDatesList');
     const dates = result.dates || [];
     target.innerHTML = dates.length
-      ? dates.map((item) => `<article class="successful-date-card"><div class="date-meta">${escapeHtml(prettyDate(item.created_at))} · ${item.kind === 'budget' ? 'Уютно' : 'Особенно'} · ${item.place === 'outside' ? 'Снаружи' : 'Внутри'}</div><h4>${item.kind === 'budget' ? '🌷' : '✨'} ${escapeHtml(item.idea)}</h4><p>${escapeHtml(item.reflection)}</p>${item.repeat ? '<span class="repeat-mark">хочется повторить</span>' : ''}</article>`).join('')
-      : '<article class="successful-date-card"><p>Здесь пока пусто. Сначала выберите идею и расскажите, как всё прошло 💗</p></article>';
+      ? dates.map((item) => `<article class="successful-date-card"><div class="date-meta">${escapeHtml(prettyDate(item.created_at))} · ${item.kind === 'budget' ? 'Уютно' : 'Особенно'} · ${item.place === 'outside' ? 'Снаружи' : 'Внутри'}</div><h4>${item.kind === 'budget' ? '' : ''} ${escapeHtml(item.idea)}</h4><p>${escapeHtml(item.reflection)}</p>${item.repeat ? '<span class="repeat-mark">хочется повторить</span>' : ''}</article>`).join('')
+      : '<article class="successful-date-card"><p>Здесь пока пусто. Сначала выберите идею и расскажите, как всё прошло </p></article>';
   } catch (error) { showToast(error.message); }
 }
 
@@ -1810,7 +1906,7 @@ async function openCapsule() {
     const result = await api('/api/capsule?draw=1');
     const target = $('#capsuleResult');
     target.classList.remove('hidden');
-    target.textContent = result.entry ? `💌 ${result.entry.text || result.entry.body}` : 'Капсула пока пустая — здесь обязательно появится что-то хорошее.';
+    target.textContent = result.entry ? ` ${result.entry.text || result.entry.body}` : 'Капсула пока пустая — здесь обязательно появится что-то хорошее.';
   } catch (error) { showToast(error.message); }
 }
 
@@ -1860,7 +1956,7 @@ function renderDecisions(items, types = DEFAULT_DECISION_TYPES) {
 function renderWishRows(items, mine, kind, hiddenList = false) {
   if (!items.length) return `<p class="small-note">${mine ? (hiddenList ? 'Скрытых желаний нет.' : 'Здесь пока пусто — добавьте первое желание.') : 'Партнёр пока ничего не добавил.'}</p>`;
   return items.map((item) => {
-    const status = item.received ? 'Уже получено ✓' : (mine ? 'Пока хочется' : 'Ещё хочется');
+    const status = item.received ? 'Уже получено ' : (mine ? 'Пока хочется' : 'Ещё хочется');
     const visibilityLabel = item.is_hidden ? (kind === 'intimate' ? 'Открыть партнёру' : 'Вернуть на экран') : 'Скрыть';
     const actionButtons = mine
       ? `<div class="wish-row-actions">
@@ -1946,7 +2042,7 @@ async function addWish(event) {
   try {
     await api(`/api/wishes?kind=${encodeURIComponent(kind)}`, { method: 'POST', body: JSON.stringify({ text, kind }) });
     form.reset();
-    showToast(kind === 'intimate' ? 'Сексуальное желание сохранено — пока оно скрыто 🔒' : 'Желание сохранено 💗');
+    showToast(kind === 'intimate' ? 'Сексуальное желание сохранено — пока оно скрыто ' : 'Желание сохранено ');
     await loadWishes(kind);
   } catch (error) { showToast(error.message); }
 }
@@ -1963,7 +2059,7 @@ async function addOurItem(event, endpoint) {
     form.reset();
     if (endpoint === '/api/decisions') renderDecisionSelectors();
     renderEncouragement('calm');
-    showToast('Сохранила для вас двоих 💗');
+    showToast('Сохранила для вас двоих ');
     await loadOurData();
   } catch (error) { showToast(error.message); }
 }
@@ -1979,9 +2075,9 @@ async function chooseDecision() {
       ? `<strong>Котик выбрал:</strong> ${escapeHtml(result.choice.text)}<small>Тип: ${escapeHtml(result.type?.label || 'решение')}</small>`
       : 'Для этого типа пока нет вариантов.';
     const button = $('#chooseDecisionButton');
-    if (button) button.textContent = 'Выбрать ещё раз 🎲';
+    if (button) button.textContent = 'Выбрать ещё раз ';
     renderEncouragement('calm');
-    showToast('Котик выбрал вариант 🎲');
+    showToast('Котик выбрал вариант ');
   } catch (error) { showToast(error.message); }
 }
 
@@ -2023,7 +2119,7 @@ async function addIdea(event) {
   try {
     await api('/api/ideas', { method: 'POST', body: JSON.stringify({ kind: data.kind, place: data.place, text: data.text }) });
     form.reset();
-    showToast('Идея спрятана в общий мешочек 💗');
+    showToast('Идея спрятана в общий мешочек ');
     await loadIdeaLists('date');
   } catch (error) { showToast(error.message); }
 }
@@ -2108,7 +2204,7 @@ function renderAnniversary() {
   const pad = (value) => String(value).padStart(2, '0');
   lead.textContent = `Вы вместе ${info.duration} — с 26.03.2025.`;
   countdown.textContent = info.isAnniversaryToday
-    ? 'Сегодня ваш день 💗'
+    ? 'Сегодня ваш день '
     : `${info.days} дн. ${pad(info.hours)} ч. ${pad(info.minutes)} мин.`;
   countdownLabel.textContent = info.isAnniversaryToday ? 'с годовщиной!' : 'до ближайшего 26 марта';
   callout?.classList.toggle('hidden', !info.isNear);
@@ -2173,7 +2269,7 @@ async function saveAnniversaryIdea(event) {
   try {
     await api('/api/anniversary-ideas', { method: 'POST', body: JSON.stringify({ text }) });
     form.reset();
-    showToast('Идея для годовщины сохранена ✨');
+    showToast('Идея для годовщины сохранена ');
     await loadAnniversaryIdeas();
   } catch (error) { showToast(error.message); }
 }
@@ -2199,7 +2295,8 @@ function openModal(id) {
   const modal = $(`#${id}`);
   if (!modal) return;
   modal.classList.remove('hidden');
-  modal.querySelector('textarea, input')?.focus();
+  // Opening a panel must not summon the mobile keyboard.
+  modal.querySelector('.modal-close')?.focus({ preventScroll: true });
 }
 
 function closeModal(id) {
@@ -2208,6 +2305,7 @@ function closeModal(id) {
 
 
 const INFO_CONTENT = {
+  agreements: { title: 'Договорённости', lines: ['Общие решения после разговора. Здесь те же записи, что в вашем уголке.', 'Статус можно изменить, а удаление действует на общее пространство.'] },
   mailbox: {
     title: 'Ящик',
     lines: ['Сохраняйте важные мысли до общего разговора.', 'Сладости и гадости остаются личными до выбранного дня.'],
@@ -2259,6 +2357,7 @@ const INFO_CONTENT = {
 };
 
 const VIEW_INFO_KEYS = {
+  agreements: 'agreements',
   mailbox: 'mailbox',
   conversation: 'conversation',
   homework: 'homework',
@@ -2270,6 +2369,7 @@ const VIEW_INFO_KEYS = {
 
 // The reusable button travels into the card it explains instead of making a separate row under navigation.
 const INFO_HOSTS = {
+  agreements: '#agreementsView .agreements-card',
   mailbox: '#mailboxView .write-card',
   conversation: '#conversationView .date-controls-card',
   homework: '#homeworkView #homeworkCard:not(.hidden), #homeworkView #homeworkEmpty',
@@ -2348,40 +2448,14 @@ async function saveFeedback(event) {
     await api('/api/feedback', { method: 'POST', body: JSON.stringify({ text }) });
     form.reset();
     renderEncouragement('calm');
-    showToast('Идея сохранена, не потеряется 💡');
+    showToast('Идея сохранена, не потеряется ');
     await loadFeedback();
   } catch (error) { showToast(error.message); }
 }
 
-const CAT_PIECE_SVG = `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="tttCatGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffb8dc"/>
-      <stop offset="100%" stop-color="#c8b0f6"/>
-    </linearGradient>
-  </defs>
-  <path d="M18 48 L24 14 Q26 9 31 14 L47 28 Q60 22 73 28 L89 14 Q94 9 96 15 L102 48 Q105 86 60 92 Q15 86 18 48Z" fill="url(#tttCatGrad)" stroke="#9e6bc0" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M28 24 L31 38 L42 32Z M92 24 L89 38 L78 32Z" fill="#f288be"/>
-  <path d="M40 53 Q46 46 52 53 M68 53 Q74 46 80 53" fill="none" stroke="#63325c" stroke-width="3.2" stroke-linecap="round"/>
-  <ellipse cx="35" cy="63" rx="8" ry="4.2" fill="#eb82b5" opacity=".55"/>
-  <ellipse cx="85" cy="63" rx="8" ry="4.2" fill="#eb82b5" opacity=".55"/>
-  <path d="M57 59 Q60 56 63 59 L60 63Z" fill="#9a4b82"/>
-  <path d="M60 63 Q56 70 51 66 M60 63 Q64 70 69 66 M38 62 L21 59 M38 67 L21 70 M82 62 L99 59 M82 67 L99 70" fill="none" stroke="#63325c" stroke-width="2" stroke-linecap="round"/>
-</svg>`;
+const CAT_PIECE_SVG = `<img class="ttt-pixel-piece" src="/assets/ui/cat.svg" alt="Котик">`;
 
-const HEART_PIECE_SVG = `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="tttHeartGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff65b0"/>
-      <stop offset="55%" stop-color="#e374e8"/>
-      <stop offset="100%" stop-color="#b68cf6"/>
-    </linearGradient>
-  </defs>
-  <path d="M60 94 C60 94 16 66 16 37 C16 20 30 12 44 16 C52 18 57 24 60 30 C63 24 68 18 76 16 C90 12 104 20 104 37 C104 66 60 94 60 94Z" fill="url(#tttHeartGrad)" stroke="#9e529f" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M34 30 Q40 23 48 27" fill="none" stroke="#fff2fa" stroke-width="3.5" stroke-linecap="round" opacity=".8"/>
-  <circle cx="95" cy="20" r="3.5" fill="#ff8ac6"/>
-  <path d="M22 82 L24 76 L26 82 L32 84 L26 86 L24 92 L22 86 L16 84Z" fill="#cba8f5"/>
-</svg>`;
+const HEART_PIECE_SVG = `<img class="ttt-pixel-piece" src="/assets/ui/heart.svg" alt="Сердечко">`;
 
 let activeGameSubtab = 'truths';
 let truthHintCursor = -1;
@@ -2404,7 +2478,7 @@ function showNextTruthTopicHint() {
   const banner = $('#truthTopicHint');
   if (!banner) return;
   banner.classList.remove('hidden');
-  banner.textContent = `💡 Идея темы: «${TRUTH_TOPIC_HINTS[truthHintCursor]}»`;
+  banner.textContent = ` Идея темы: «${TRUTH_TOPIC_HINTS[truthHintCursor]}»`;
 }
 
 function renderTruthsSection(truthsData = {}) {
@@ -2436,7 +2510,7 @@ function renderTruthsSection(truthsData = {}) {
     activeArea.innerHTML = latestDone
       ? renderCompletedTruthRound(latestDone, true)
       : `<div class="game-start">
-          <div class="game-start-icon" aria-hidden="true">💌</div>
+          <div class="game-start-icon" aria-hidden="true"></div>
           <h4>Активных загадок пока нет</h4>
           <p>Напиши ниже две свои правды и одну мечту — карточки перемешаются, и партнёр сможет отгадать их!</p>
         </div>`;
@@ -2449,19 +2523,19 @@ function renderTruthsSection(truthsData = {}) {
         return `<label class="truths-option-label">
           <input type="radio" name="${radioName}" value="${idx}" ${isChecked ? 'checked' : ''}>
           <span>${escapeHtml(opt)}</span>
-          <span class="truths-option-tag">${isChecked ? '✨ Это мечта' : 'Правда?'}</span>
+          <span class="truths-option-tag">${isChecked ? ' Это мечта' : 'Правда?'}</span>
         </label>`;
       }).join('');
       return `<article class="truths-round-card" data-truth-round="${round.id}">
         <div class="truths-round-header">
-          <span class="truths-round-author">💌 Загадал(а): ${escapeHtml(round.author_name)}</span>
+          <span class="truths-round-author"> Загадал(а): ${escapeHtml(round.author_name)}</span>
           <button class="quiet-button" type="button" data-truth-delete="${round.id}" title="Удалить раунд">Удалить ×</button>
         </div>
         <p class="small-note">${round.is_author
           ? 'Ты загадал(а) этот раунд. Партнёр может отгадать со своего устройства или прямо здесь:'
           : 'Два утверждения — чистая правда, а одно — мечта. Отметь карточку, где спрятана МЕЧТА:'}</p>
         <div class="truths-options-list">${optionsHtml}</div>
-        <button class="button primary" type="button" data-truth-submit="${round.id}">Проверить: где мечта? ✨</button>
+        <button class="button primary" type="button" data-truth-submit="${round.id}">Проверить: где мечта? </button>
       </article>`;
     }).join('');
   }
@@ -2472,7 +2546,7 @@ function renderTruthsSection(truthsData = {}) {
       card?.querySelectorAll('.truths-option-label').forEach((lbl) => {
         const inp = lbl.querySelector('input');
         const tag = lbl.querySelector('.truths-option-tag');
-        if (tag) tag.textContent = inp?.checked ? '✨ Это мечта' : '✅ Правда';
+        if (tag) tag.textContent = inp?.checked ? ' Это мечта' : ' Правда';
       });
     });
   });
@@ -2500,12 +2574,12 @@ function renderCompletedTruthRound(round, isBanner) {
     const wasPicked = idx === Number(round.guessed_index);
     return `<div class="truths-reveal-item ${isDream ? 'is-dream' : ''}">
       <span>${escapeHtml(text)}${wasPicked ? ' <b>(выбрано)</b>' : ''}</span>
-      <span class="truth-badge ${isDream ? 'dream' : 'truth'}">${isDream ? '✨ Мечта' : '✅ Правда'}</span>
+      <span class="truth-badge ${isDream ? 'dream' : 'truth'}">${isDream ? ' Мечта' : ' Правда'}</span>
     </div>`;
   }).join('');
   return `<article class="truths-round-card">
     <div class="truths-round-header">
-      <span class="truths-round-author">${round.is_correct ? '🎉 Мечта угадана!' : '💭 Мечта оказалась в другой карточке'} · автор: ${escapeHtml(round.author_name)}</span>
+      <span class="truths-round-author">${round.is_correct ? ' Мечта угадана!' : ' Мечта оказалась в другой карточке'} · автор: ${escapeHtml(round.author_name)}</span>
       ${isBanner ? '<span class="small-note">Последний разбор</span>' : `<button class="quiet-button" type="button" data-truth-delete="${round.id}">×</button>`}
     </div>
     <div class="truths-options-list">${items}</div>
@@ -2529,7 +2603,7 @@ async function createTruthRound(event) {
     form.reset();
     latestGamesData = result;
     renderTruthsSection(result.truths);
-    showToast('Раунд загадан и перемешан 💌');
+    showToast('Раунд загадан и перемешан ');
   } catch (error) {
     showToast(error.message);
   }
@@ -2538,7 +2612,7 @@ async function createTruthRound(event) {
 async function submitTruthGuess(roundId) {
   const radio = document.querySelector(`input[name="truthGuess_${roundId}"]:checked`);
   if (!radio) {
-    showToast('Выбери карточку, которая кажется тебе мечтой ✨');
+    showToast('Выбери карточку, которая кажется тебе мечтой ');
     return;
   }
   try {
@@ -2552,7 +2626,7 @@ async function submitTruthGuess(roundId) {
     });
     latestGamesData = result;
     renderTruthsSection(result.truths);
-    showToast('Ответ проверен ✨');
+    showToast('Ответ проверен ');
   } catch (error) {
     showToast(error.message);
   }
@@ -3204,7 +3278,7 @@ async function saveProfileName(event) {
   }
   try {
     await api('/api/pin', { method: 'POST', body: JSON.stringify({ name }) });
-    showToast('Имя профиля обновлено ✨');
+    showToast('Имя профиля обновлено ');
     await refresh();
   } catch (error) {
     showToast(error.message);
@@ -3266,7 +3340,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('#feedbackButton').addEventListener('click', async () => { closeTopMenu(); openModal('feedbackModal'); await loadFeedback(); });
   $('#settingsButton').addEventListener('click', () => { closeTopMenu(); openModal('settingsModal'); });
-  $('#personalizeButton')?.addEventListener('click', openPersonalization);
   $('#savePersonalizationButton')?.addEventListener('click', savePersonalization);
   $('#partnerBadge')?.addEventListener('click', openPartnerProfile);
   $('#editPartnerProfileButton')?.addEventListener('click', beginPartnerProfileEdit);
@@ -3376,7 +3449,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#intimateWishForm').addEventListener('submit', addWish);
   $('#decisionKind').addEventListener('change', () => {
     $('#decisionResult').classList.add('hidden');
-    $('#chooseDecisionButton').textContent = 'Выбрать ответ 🎲';
+    $('#chooseDecisionButton').textContent = 'Выбрать ответ ';
   });
   $('#chooseDecisionButton').addEventListener('click', chooseDecision);
   renderDecisionSelectors();

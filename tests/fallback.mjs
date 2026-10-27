@@ -34,8 +34,10 @@ const savedPrefs = await call('/api/preferences', 'POST', {
   orders: { main: ['games', 'mailbox', 'dates', 'our'], mailbox: ['capsule', 'mailbox', 'conversation', 'homework'] },
 });
 assert.equal(savedPrefs.preferences.theme, 'blue');
+// A custom tab order is personal and now survives; a key left out of the list
+// is appended in its default place instead of disappearing.
 assert.equal(JSON.stringify(savedPrefs.preferences.orders.main), JSON.stringify(['games', 'mailbox', 'dates', 'our']));
-assert.equal(JSON.stringify(savedPrefs.preferences.orders.mailbox), JSON.stringify(['capsule', 'mailbox', 'conversation', 'homework']));
+assert.equal(JSON.stringify(savedPrefs.preferences.orders.mailbox), JSON.stringify(['capsule', 'mailbox', 'conversation', 'homework', 'agreements']));
 assert.equal((await call('/api/state')).preferences.theme, 'blue');
 as(2);
 assert.equal((await call('/api/preferences')).preferences.theme, 'pink', 'the partner keeps a separate appearance');
@@ -140,3 +142,32 @@ assert.throws(() => applyClassicMove(board, 'heart', 7), /завершена/);
 assert.deepEqual(normalizeClassicTttState({ catMoves: [0, 0, 1], heartMoves: [1, 2] }).catMoves, [0, 1]);
 
 console.log('PASS: profile/PIN, per-account personalization, private partner cards, Truths reset, authenticated endless-run records, and conventional identity-bound Tic-Tac-Toe wins/draws.');
+
+// Notes stay closed before opening; finishing a cycle removes notes, not homework/capsule.
+as(1);
+await call('/api/notes','POST',{category:'hard',body:'Тема для спокойного разговора'});
+assert.equal((await call('/api/state')).notes.length,0);
+as(2);assert.equal((await call('/api/state')).notes.length,0);
+await call('/api/open','POST',{now:true});
+const opened=await call('/api/state');assert.equal(opened.notes.length,1);
+const homework=await call('/api/homework','POST',{action:'create',note_id:opened.notes[0].id});
+const caseId=homework.cases[0].id;
+await call('/api/homework','POST',{action:'answer',case_id:caseId,body:'Мой взгляд пока закрыт от партнёра'});
+as(1);
+assert.equal((await call('/api/homework')).cases[0].partner_answer,null);
+await call('/api/capsule','POST',{body:'Тёплая запись остаётся после разговора'});
+await call('/api/finish','POST',{});
+assert.equal((await call('/api/state')).opened,false);
+assert.equal((await call('/api/state')).notes.length,0);
+assert.equal((await call('/api/homework')).cases.length,1);
+assert.equal((await call('/api/capsule')).entries.length,1);
+await call('/api/homework','POST',{action:'answer',case_id:caseId,body:'Теперь мы оба поделились своим взглядом'});
+assert.equal((await call('/api/homework')).cases[0].ready,true);
+assert((await call('/api/homework')).cases[0].partner_answer.body.includes('закрыт'));
+// New settings remain personal, including night mode and home arrangement.
+await call('/api/preferences','POST',{theme:'purple',mode:'dark',homeOrder:['intimate','wishes','agreements','decisions'],homeTitles:{wishes:'Наши мечты'}});
+assert.equal((await call('/api/preferences')).preferences.mode,'dark');
+await call('/api/preferences','POST',{homeHidden:['decisions']});
+assert.equal((await call('/api/preferences')).preferences.mode,'dark');
+as(2);assert.equal((await call('/api/preferences')).preferences.mode,'light');
+console.log('PASS: closed letters, two-answer gate, cycle disappearance with preserved homework/capsule, personal v30 settings.');

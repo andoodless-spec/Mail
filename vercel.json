@@ -4,5 +4,8 @@
     "api/[...path].js": {
       "maxDuration": 10
     }
-  }
+  },
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }

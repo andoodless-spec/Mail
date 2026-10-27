@@ -1,36 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="iconBg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffe6f3"/>
-      <stop offset="52%" stop-color="#f5dcff"/>
-      <stop offset="100%" stop-color="#dec8ff"/>
-    </linearGradient>
-    <linearGradient id="kittenFur" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffb8dc"/>
-      <stop offset="100%" stop-color="#c8b0f6"/>
-    </linearGradient>
-    <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff65b0"/>
-      <stop offset="100%" stop-color="#d76bf0"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="118" fill="url(#iconBg)"/>
-  <circle cx="256" cy="256" r="210" fill="#ffffff" opacity="0.38"/>
-  <g transform="translate(12, 18) scale(2.95)">
-    <ellipse cx="83" cy="141" rx="54" ry="7" fill="#c79ee0" opacity=".28"/>
-    <path d="M117 126 C155 141 158 103 140 103 C128 103 130 115 138 115" fill="none" stroke="#b996e5" stroke-width="11" stroke-linecap="round"/>
-    <path d="M52 102 Q40 118 48 137 Q80 146 116 137 Q125 118 112 102" fill="url(#kittenFur)" stroke="#9e6bc0" stroke-width="3.2"/>
-    <path d="M31 60 L37 20 Q39 15 44 20 L64 37 Q81 30 101 37 L123 20 Q128 16 129 22 L134 62 Q138 103 83 109 Q28 106 31 60Z" fill="url(#kittenFur)" stroke="#9e6bc0" stroke-width="3.2" stroke-linejoin="round"/>
-    <path d="M42 31 L46 49 L58 42Z M120 31 L108 43 L124 49Z" fill="#f288be" opacity=".88"/>
-    <path d="M56 68 Q63 60 70 68 M96 68 Q103 60 110 68" fill="none" stroke="#63325c" stroke-width="3.6" stroke-linecap="round"/>
-    <ellipse cx="50" cy="79" rx="10" ry="5.2" fill="#eb82b5" opacity=".58"/>
-    <ellipse cx="116" cy="79" rx="10" ry="5.2" fill="#eb82b5" opacity=".58"/>
-    <path d="M79 74 Q83 71 87 74 L83 79Z" fill="#9a4b82"/>
-    <path d="M83 79 Q79 87 73 82 M83 79 Q87 87 93 82 M57 78 L35 74 M57 84 L35 88 M108 78 L131 74 M108 84 L131 88" fill="none" stroke="#63325c" stroke-width="2.2" stroke-linecap="round"/>
-    <path d="M83 116 C68 97 52 116 83 136 C114 116 98 97 83 116Z" fill="url(#heartGrad)" stroke="#bd5294" stroke-width="1.8"/>
-    <path d="M56 112 Q56 125 68 124 M109 112 Q110 125 98 124" fill="none" stroke="#9e6bc0" stroke-width="6" stroke-linecap="round"/>
-    <path d="M18 38 L20 31 L22 38 L29 40 L22 42 L20 49 L18 42 L11 40Z" fill="#ff74b8"/>
-    <path d="M145 58 C136 48 132 60 145 67 C158 60 154 48 145 58Z" fill="#e978b8"/>
-    <circle cx="138" cy="24" r="3.5" fill="#b48ce6"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <title>Тихий ящик — розовый котик</title>
+  <path fill="#f3e4e8" d="M0 0h32v32H0z"/>
+  <path fill="#936778" d="M4 4h7v17H4z"/>
+  <path fill="#936778" d="M21 4h7v17H21z"/>
+  <path fill="#936778" d="M4 11h24v12H4z"/>
+  <path fill="#936778" d="M7 23h18v4H7z"/>
+  <path fill="#936778" d="M11 27h10v2H11z"/>
+  <path fill="#dda9bb" d="M6 6h3v9H6z"/>
+  <path fill="#dda9bb" d="M23 6h3v9H23z"/>
+  <path fill="#dda9bb" d="M9 9h14v6H9z"/>
+  <path fill="#dda9bb" d="M6 13h20v10H6z"/>
+  <path fill="#dda9bb" d="M8 23h16v2H8z"/>
+  <path fill="#dda9bb" d="M12 25h8v2H12z"/>
+  <path fill="#c58a9f" d="M7 8h2v5H7z"/>
+  <path fill="#c58a9f" d="M23 8h2v5H23z"/>
+  <path fill="#ebbfcd" d="M10 11h12v2H10z"/>
+  <path fill="#ebbfcd" d="M8 13h3v2H8z"/>
+  <path fill="#594655" d="M9 16h3v3H9z"/>
+  <path fill="#594655" d="M20 16h3v3H20z"/>
+  <path fill="#fff3f3" d="M9 16h1v1H9z"/>
+  <path fill="#fff3f3" d="M20 16h1v1H20z"/>
+  <path fill="#cf8ea6" d="M6 20h4v2H6z"/>
+  <path fill="#cf8ea6" d="M22 20h4v2H22z"/>
+  <path fill="#c58a9f" d="M15 20h2v2H15z"/>
+  <path fill="#594655" d="M15 22h2v1H15z"/>
+  <path fill="#594655" d="M13 23h2v1H13z"/>
+  <path fill="#594655" d="M17 23h2v1H17z"/>
+  <path fill="#936778" d="M1 18h4v1H1z"/>
+  <path fill="#936778" d="M0 21h5v1H0z"/>
+  <path fill="#936778" d="M27 18h4v1H27z"/>
+  <path fill="#936778" d="M27 21h5v1H27z"/>
 </svg>
