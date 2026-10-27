@@ -1,12 +1,12 @@
-name: Тихий ящик 2.3.0 (оформление v33) — распаковка архива
+name: Тихий ящик 2.4.1 (оформление v34) — распаковка архива
 
-# Распаковщик под конкретную поставку: quiet-mailbox-v33.zip, версия 2.3.0, appearanceVersion 33.
+# Распаковщик под конкретную поставку: quiet-mailbox-v34.zip, версия 2.4.1, appearanceVersion 34.
 # Запуск: положить архив в корень основной ветки (или Actions → Run workflow).
 
 on:
   push:
     paths:
-      - 'quiet-mailbox-v33.zip'
+      - 'quiet-mailbox-v34.zip'
       - '.github/workflows/unzip-quiet-mailbox.yml'
   workflow_dispatch:
 
@@ -14,18 +14,18 @@ permissions:
   contents: write
 
 concurrency:
-  group: unzip-quiet-mailbox-v33
+  group: unzip-quiet-mailbox-v34
   cancel-in-progress: false
 
 env:
   # ▼▼▼ конкретная версия: архив, его SHA-256 и ожидаемые значения ▼▼▼
-  ARCHIVE: quiet-mailbox-v33.zip
-  ARCHIVE_SHA256: d37291e0fa8b73db9e5b72f8642097be24817297a57015818d1c53c51afad02b
-  ARCHIVE_BYTES: '254576'
+  ARCHIVE: quiet-mailbox-v34.zip
+  ARCHIVE_SHA256: ffbfd9e8960ef1639c1e3c768aa839ac9ede2aae73f28cce2ee61953a0bbe6a1
+  ARCHIVE_BYTES: '265606'
   ZIP_ROOT: quiet-mailbox
-  EXPECT_VERSION: 2.3.0
-  EXPECT_APPEARANCE: '33'
-  EXPECT_FILES: '111'
+  EXPECT_VERSION: 2.4.1
+  EXPECT_APPEARANCE: '34'
+  EXPECT_FILES: '114'
   # ▲▲▲ если пересобрали архив — обновите эти пять значений ▲▲▲
 
 jobs:
@@ -55,10 +55,10 @@ jobs:
           echo "Размер: $bytes байт (ожидается $ARCHIVE_BYTES)"
           echo "SHA-256: $hash"
           if [ "$hash" != "$ARCHIVE_SHA256" ]; then
-            echo "::error::Контрольная сумма не совпадает с версией 2.3.0. Это другой файл или архив докачался не полностью. Файлы в репозитории не изменены. Если архив пересобран намеренно — обновите ARCHIVE_SHA256 и ARCHIVE_BYTES в workflow."
+            echo "::error::Контрольная сумма не совпадает с версией 2.4.1. Это другой файл или архив докачался не полностью. Файлы в репозитории не изменены. Если архив пересобран намеренно — обновите ARCHIVE_SHA256 и ARCHIVE_BYTES в workflow."
             exit 1
           fi
-          echo "Это тот самый архив 2.3.0."
+          echo "Это тот самый архив 2.4.1."
 
       - name: Распаковать
         id: unpack
@@ -81,7 +81,7 @@ jobs:
           cd "$root"
 
           files="$(find . -type f | wc -l)"
-          [ "$files" = "$EXPECT_FILES" ] || { echo "::error::В архиве $files файлов вместо $EXPECT_FILES. Состав не тот, что в 2.3.0."; exit 1; }
+          [ "$files" = "$EXPECT_FILES" ] || { echo "::error::В архиве $files файлов вместо $EXPECT_FILES. Состав не тот, что в 2.4.1."; exit 1; }
 
           version="$(node -p "require('./package.json').version")"
           [ "$version" = "$EXPECT_VERSION" ] || { echo "::error::package.json: версия $version вместо $EXPECT_VERSION"; exit 1; }
@@ -90,15 +90,15 @@ jobs:
           [ "$rel" = "$EXPECT_VERSION / $EXPECT_APPEARANCE" ] || { echo "::error::RELEASE.json: $rel вместо $EXPECT_VERSION / $EXPECT_APPEARANCE"; exit 1; }
 
           # то, что появилось именно в этой версии
-          for f in settings.js backup.js RELEASE-v33.md assets/ui/profile.svg assets/ui/palette.svg; do
-            [ -f "$f" ] || { echo "::error::Нет файла $f — это архив не 2.3.0 (v33)."; exit 1; }
+          for f in settings.js backup.js RELEASE-v341.md assets/ui/anniversary.svg assets/ui/profile.svg assets/ui/palette.svg; do
+            [ -f "$f" ] || { echo "::error::Нет файла $f — это архив не 2.4.1 (v34)."; exit 1; }
           done
-          grep -q 'settings.js?v=33' index.html || { echo "::error::index.html не подключает settings.js?v=33"; exit 1; }
+          grep -q 'settings.js?v=35' index.html || { echo "::error::index.html не подключает settings.js?v=35"; exit 1; }
           for tab in settingsPanelAppearance settingsPanelLayout settingsPanelAlerts settingsPanelAccount; do
             grep -q "$tab" index.html || { echo "::error::В index.html нет вкладки $tab"; exit 1; }
           done
-          grep -rq 'appearanceVersion: 33\|appearanceVersion.*33' lib/preferences.js || { echo "::error::lib/preferences.js без appearanceVersion 33"; exit 1; }
-          echo "Версия 2.3.0 / оформление v33 подтверждена по файлам."
+          grep -q 'appearanceVersion: 34' lib/preferences.js || { echo "::error::lib/preferences.js без appearanceVersion 34"; exit 1; }
+          echo "Версия 2.4.1 / оформление v34 подтверждена по файлам."
 
       - name: Не пускать в репозиторий секреты и мусор
         shell: bash
@@ -153,9 +153,9 @@ jobs:
             echo "В ветке уже ровно эта версия — коммит не нужен."
             exit 0
           fi
-          git commit -m "Тихий ящик 2.3.0 (оформление v33)"
+          git commit -m "Тихий ящик 2.4.1 (оформление v34)"
           git push origin "HEAD:${GITHUB_REF_NAME}" || {
             echo "::error::Push отклонён. Settings → Actions → General → Workflow permissions → Read and write permissions. Защищённую ветку этот workflow не обходит."
             exit 1
           }
-          echo "ГОТОВО: 2.3.0 / v33 в ветке ${GITHUB_REF_NAME}, коммит $(git rev-parse --short HEAD)."
+          echo "ГОТОВО: 2.4.1 / v34 в ветке ${GITHUB_REF_NAME}, коммит $(git rev-parse --short HEAD)."
